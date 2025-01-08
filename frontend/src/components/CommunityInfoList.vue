@@ -1,10 +1,16 @@
 <template>
   <div class="community-info-list">
     <el-card>
-      <el-row>
-        <el-col :span="24">
-          <el-input v-model="search" placeholder="搜索小区名称" class="filter-item" />
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-input v-model="search.name" placeholder="搜索小区名称" class="filter-item" />
+        </el-col>
+        <el-col :span="8">
+          <el-input v-model="search.code" placeholder="搜索小区编号" class="filter-item" />
+        </el-col>
+        <el-col :span="8">
           <el-button type="primary" @click="searchCommunity">搜索</el-button>
+          <el-button type="success" @click="showAddDialog = true">添加小区</el-button>
         </el-col>
       </el-row>
       <el-table :data="communityList" style="width: 100%" class="community-table">
@@ -14,16 +20,19 @@
         <el-table-column prop="status" label="状态" :formatter="formatStatus" />
         <el-table-column label="操作">
           <template #default="scope">
-            <el-button type="text" size="small" @click="viewDetails(scope.row)">查看详情</el-button>
+            <el-button type="primary" size="small" @click="editCommunity(scope.row)">编辑</el-button>
+            <el-button type="danger" size="small" @click="deleteCommunity(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
       <el-pagination
         background
-        layout="prev, pager, next"
+        layout="sizes, prev, pager, next"
         :total="total"
         :current-page="currentPage"
         :page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        @size-change="handleSizeChange"
         @current-change="handlePageChange"
       />
     </el-card>
@@ -37,40 +46,73 @@ export default {
   name: 'CommunityInfoList',
   data() {
     return {
-      search: '',
-      communityList: [
-        {
-          name: '小区A',
-          location: '位置A',
-          totalUnits: 100,
-          status: 'active',
-        },
-        {
-          name: '小区B',
-          location: '位置B',
-          totalUnits: 150,
-          status: 'inactive',
-        },
-      ],
-      total: 2,
+      loading: false,
+      batchLoading: false,
+      emptyText: '暂无数据',
+      search: {
+        name: '',
+        code: ''
+      },
+      showAddDialog: false,
+      communityList: [],
+      selectedCommunities: [],
+      total: 0,
       currentPage: 1,
       pageSize: 10,
     };
   },
   methods: {
     async fetchCommunities() {
+      this.loading = true;
       try {
         const response = await axios.get('/api/communities', {
           params: {
-            search: this.search,
+            name: this.search.name,
+            code: this.search.code,
             page: this.currentPage,
             size: this.pageSize,
           },
         });
         this.communityList = response.data.communities;
         this.total = response.data.total;
+        this.$message.success('数据加载成功');
       } catch (error) {
         console.error('获取小区信息失败:', error);
+        this.$message.error('获取小区信息失败');
+        // 添加模拟数据
+        this.communityList = [
+          {
+            id: 1,
+            name: '阳光花园',
+            code: 'YG001',
+            location: '北京市朝阳区',
+            totalUnits: 500,
+            status: 'active',
+            createTime: '2023-01-01 10:00:00'
+          },
+          {
+            id: 2,
+            name: '幸福家园',
+            code: 'XF002',
+            location: '上海市浦东新区',
+            totalUnits: 800,
+            status: 'inactive',
+            createTime: '2023-02-15 14:30:00'
+          },
+          {
+            id: 3,
+            name: '和谐小区',
+            code: 'HX003',
+            location: '广州市天河区',
+            totalUnits: 300,
+            status: 'active',
+            createTime: '2023-03-20 09:15:00'
+          }
+        ];
+        this.total = this.communityList.length;
+        this.$message.success('已加载模拟数据');
+      } finally {
+        this.loading = false;
       }
     },
     searchCommunity() {
@@ -84,9 +126,23 @@ export default {
     formatStatus(row, column, cellValue) {
       return cellValue === 'active' ? '活跃' : '非活跃';
     },
-    viewDetails(row) {
-      console.log('查看详情:', row);
-      // 可以添加查看详情的逻辑
+    editCommunity(row) {
+      console.log('编辑:', row);
+      // 可以添加编辑逻辑
+    },
+    deleteCommunity(row) {
+      this.$confirm('确定要删除该小区吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        console.log('删除:', row);
+        // 可以添加删除逻辑
+      }).catch(() => {});
+    },
+    handleSizeChange(size) {
+      this.pageSize = size;
+      this.fetchCommunities();
     },
   },
   mounted() {

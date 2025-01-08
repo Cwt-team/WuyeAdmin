@@ -63,8 +63,35 @@ export default {
         });
         this.roleList = response.data.roles;
         this.total = response.data.total;
+        this.$message.success('数据加载成功');
       } catch (error) {
         console.error('获取角色信息失败:', error);
+        this.$message.error('获取角色信息失败');
+        // 添加模拟数据
+        this.roleList = [
+          {
+            roleName: '超级管理员',
+            description: '拥有所有权限',
+            permissions: ['*']
+          },
+          {
+            roleName: '小区管理员',
+            description: '管理指定小区',
+            permissions: ['community:read', 'community:write']
+          },
+          {
+            roleName: '物业管理员',
+            description: '管理物业相关事务',
+            permissions: ['property:read', 'property:write']
+          },
+          {
+            roleName: '财务管理员',
+            description: '管理财务相关事务',
+            permissions: ['finance:read', 'finance:write']
+          }
+        ];
+        this.total = this.roleList.length;
+        this.$message.success('已加载模拟数据');
       }
     },
     searchRole() {
