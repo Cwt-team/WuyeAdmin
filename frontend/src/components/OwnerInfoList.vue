@@ -11,6 +11,23 @@
         <el-col :span="2">
           <el-button type="primary" @click="searchOwners">查询</el-button>
         </el-col>
+        <el-col :span="4">
+          <el-button type="success" @click="exportTemplate">导出模版</el-button>
+        </el-col>
+        <el-col :span="4">
+          <el-button type="warning" @click="exportOwners">导出业主</el-button>
+        </el-col>
+        <el-col :span="4">
+          <el-upload
+            action="/api/owners/import"
+            :show-file-list="false"
+            :before-upload="beforeUpload"
+            :on-success="handleImportSuccess"
+            :on-error="handleImportError"
+          >
+            <el-button type="info">导入业主</el-button>
+          </el-upload>
+        </el-col>
       </el-row>
 
       <el-table :data="ownerList" style="width: 100%">
@@ -110,6 +127,34 @@ export default {
     },
     deleteOwner(row) {
       console.log('删除业主:', row);
+    },
+    exportTemplate() {
+      window.location.href = '/api/owners/export-template';
+    },
+    exportOwners() {
+      const params = new URLSearchParams({
+        room: this.filter.room,
+        name: this.filter.name
+      });
+      window.location.href = `/api/owners/export?${params.toString()}`;
+    },
+    beforeUpload(file) {
+      const isCSV = file.type === 'text/csv';
+      if (!isCSV) {
+        this.$message.error('只能上传CSV文件');
+      }
+      return isCSV;
+    },
+    handleImportSuccess(response) {
+      if (response.success) {
+        this.$message.success('导入成功');
+        this.fetchOwners();
+      } else {
+        this.$message.error(response.message || '导入失败');
+      }
+    },
+    handleImportError(error) {
+      this.$message.error(error.message || '导入失败');
     },
   },
   mounted() {

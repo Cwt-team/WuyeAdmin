@@ -22,6 +22,7 @@ class Community(db.Model):
     total_units = db.Column(db.Integer, nullable=False)
     status = db.Column(db.String(20), nullable=False, default='active')
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    owners = db.relationship('Owner', backref='community', lazy=True)
 
     def to_dict(self):
         return {
@@ -32,4 +33,30 @@ class Community(db.Model):
             'totalUnits': self.total_units,
             'status': self.status,
             'createTime': self.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        }
+
+class Owner(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    community_id = db.Column(db.Integer, db.ForeignKey('community.id'), nullable=False)
+    room = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(50), nullable=False)
+    gender = db.Column(db.String(10), nullable=False)
+    id_card = db.Column(db.String(20), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    remark = db.Column(db.String(200))
+    owner_type = db.Column(db.String(20), nullable=False)
+    update_time = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'communityId': self.community_id,
+            'room': self.room,
+            'name': self.name,
+            'gender': self.gender,
+            'idCard': self.id_card,
+            'phone': self.phone,
+            'remark': self.remark,
+            'ownerType': self.owner_type,
+            'updateTime': self.update_time.strftime('%Y-%m-%d %H:%M:%S')
         }
