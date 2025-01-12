@@ -3,14 +3,14 @@
     <header>
       <div class="header-left">
         <h1>智慧社区管理平台</h1>
+      </div>
+      <div class="header-right">
         <el-breadcrumb separator="/">
           <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
           <el-breadcrumb-item v-for="(item, index) in breadcrumb" :key="index">
             {{ item }}
           </el-breadcrumb-item>
         </el-breadcrumb>
-      </div>
-      <div class="header-right">
         <el-dropdown>
           <div class="user-info">
             <el-avatar :size="36" :src="userAvatar" />
@@ -63,6 +63,7 @@
 <script>
 import axios from 'axios';
 import { ElMenu, ElSubMenu, ElMenuItem, ElButton } from 'element-plus';
+import { ArrowDown, Setting, SwitchButton } from '@element-plus/icons-vue';
 
 export default {
   name: 'DashboardView',
@@ -71,6 +72,9 @@ export default {
     ElSubMenu,
     ElMenuItem,
     ElButton,
+    ArrowDown,
+    Setting,
+    SwitchButton,
   },
   data() {
     return {
@@ -245,9 +249,10 @@ export default {
 
 header {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* 将左右两部分分开 */
   align-items: center;
-  background: #409EFF; /* 顶部背景颜色 */
+  /* background: #1890ff;  */ /* 移除纯色背景 */
+  background: linear-gradient(135deg, #86d0ff 0%, #33a3dc 100%); /* 柔和的渐变 */
   color: white;
   padding: 10px 20px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
@@ -255,13 +260,19 @@ header {
 
 .header-left {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
 }
 
 .header-right {
   display: flex;
   align-items: center;
+  gap: 20px; /* 调整元素之间的间距 */
+}
+
+.header-left h1 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-right: 20px; /* 调整标题与面包屑的间距 */
 }
 
 .user-info {
@@ -306,23 +317,24 @@ header {
 
 .sidebar {
   width: 200px;
-  background: #001529;
-  color: #ffffff;
+  background-color: #f0f5ff; /* 浅蓝色背景 */
+  color: #003a8c; /* 深蓝色文字，作为默认颜色 */
   height: 100vh;
   overflow: auto;
 }
 
 .el-menu-vertical-demo {
   border-right: none;
+  background: transparent; /* 让菜单背景透明，显示 sidebar 的背景色 */
 }
 
 .el-menu-item, .el-sub-menu__title {
-  color: #000000 !important;
+  color: #003a8c !important; /* 深蓝色文字 */
   transition: all 0.3s ease;
 }
 
 .el-menu-item {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(0, 58, 140, 0.1); /* 深蓝色的分割线，稍微透明 */
 }
 
 .el-menu-item i {
@@ -332,20 +344,21 @@ header {
 .el-menu-item:focus,
 .el-menu-item:active,
 .el-menu-item.is-active {
-  background-color: #1677ff !important;
-  color: #fff !important;
+  background-color: #bae7ff !important; /* 更浅的蓝色作为选中背景 */
+  color: #003a8c !important; /* 选中时保持深蓝色文字 */
 }
 
 .el-menu-item:hover {
-  background-color: rgba(255, 255, 255, 0.05) !important;
+  background-color: #e6f7ff !important; /* 更浅的蓝色作为悬停背景 */
 }
 
 .el-sub-menu__title:hover {
-  background-color: rgba(255, 255, 255, 0.05) !important;
+  background-color: #e6f7ff !important; /* 子菜单标题悬停背景 */
 }
 
 .el-sub-menu .el-menu-item {
   padding-left: 50px !important;
+  background-color: transparent; /* 子菜单背景透明 */
 }
 
 main {
@@ -358,7 +371,7 @@ main {
 footer {
   text-align: center;
   padding: 10px;
-  background: #409EFF; /* 页脚背景颜色 */
+  background: linear-gradient(135deg, #86d0ff 0%, #33a3dc 100%); /* 与 header 相同的渐变 */
   color: white;
   position: relative; /* 保证在页脚固定底部 */
 }
