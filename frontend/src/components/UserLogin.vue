@@ -1,142 +1,218 @@
 <template>
   <div class="login-container">
-    <el-card class="login-card">
-      <div class="login-header">
-        <!-- 使用导入的图片 -->
-        <img :src="logo" alt="Logo" class="logo">
-        <h1>智慧社区管理平台</h1>
+    <div class="login-box">
+      <div class="login-left">
+        <div class="login-bg"></div>
       </div>
-      <div class="login-form">
-        <h2>账户密码登录</h2>
-        <!-- 登录表单 -->
-        <el-form :model="loginForm" @submit.prevent="login">
-          <el-form-item>
-            <el-input
-              v-model="loginForm.username"
-              placeholder="请输入用户名"
-            >
-              <template #prefix>
-                <UserIcon />
-              </template>
-            </el-input>
-          </el-form-item>
-          <el-form-item>
-            <el-input
-              v-model="loginForm.password"
-              type="password"
-              placeholder="请输入密码"
-            >
-              <template #prefix>
-                <LockIcon />
-              </template>
-            </el-input>
-          </el-form-item>
-          <el-form-item>
-            <el-checkbox v-model="loginForm.rememberMe">自动登录</el-checkbox>
-            <a href="#" class="forget-password">忘记密码</a>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="login">登录</el-button>
-          </el-form-item>
-        </el-form>
+      <div class="login-right">
+        <el-card class="login-card" shadow="never">
+          <div class="login-header">
+            <img :src="logo" alt="Logo" class="logo">
+            <h1>智慧社区管理平台</h1>
+          </div>
+          <div class="login-form">
+            <h2>账户密码登录</h2>
+            <el-form :model="loginForm" @submit.prevent="login">
+              <el-form-item>
+                <el-input
+                  v-model="loginForm.username"
+                  placeholder="请输入用户名"
+                  :prefix-icon="User"
+                />
+              </el-form-item>
+              <el-form-item>
+                <el-input
+                  v-model="loginForm.password"
+                  type="password"
+                  placeholder="请输入密码"
+                  :prefix-icon="Lock"
+                  show-password
+                />
+              </el-form-item>
+              <el-form-item class="remember-me">
+                <el-checkbox v-model="loginForm.rememberMe">自动登录</el-checkbox>
+                <a href="#" class="forget-password">忘记密码?</a>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="login" class="login-button">登录</el-button>
+              </el-form-item>
+            </el-form>
+          </div>
+        </el-card>
       </div>
-    </el-card>
+    </div>
     <div class="copyright">
-      Copyright © 2019 智慧社区管理平台 粤ICP备16012265号-1
+      Copyright © 2024 智慧社区管理平台
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios'; // 引入 Axios 库，用于发送 HTTP 请求
-import logoImage from '@/assets/logo.png'; // 使用 ES 模块导入图片
-import { User, Lock } from '@element-plus/icons-vue'; // 导入所需的图标组件
+import { User, Lock } from '@element-plus/icons-vue'
+import axios from 'axios'
 
 export default {
   name: 'LoginForm',
-  components: {
-    UserIcon: User,
-    LockIcon: Lock,
-  },
   data() {
     return {
       loginForm: {
         username: '',
         password: '',
-        rememberMe: false,
+        rememberMe: false
       },
-      logo: logoImage, // 将导入的图片赋值给 data
-    };
+      logo: '/logo.png' // 确保public目录下有logo.png
+    }
   },
-  mounted() {
-    console.log('UserLogin component mounted');
+  setup() {
+    return {
+      User,
+      Lock
+    }
   },
   methods: {
     async login() {
-      console.log('Login method triggered');
       try {
         const response = await axios.post('/api/login', {
           username: this.loginForm.username,
-          password: this.loginForm.password,
-        });
+          password: this.loginForm.password
+        })
         if (response.data.success) {
-          console.log('登录成功:', response.data.message);
-          localStorage.setItem('isLoggedIn', 'true');
-          this.$router.push('/dashboard');
+          localStorage.setItem('isLoggedIn', 'true')
+          this.$router.push('/dashboard')
         } else {
-          console.log('登录失败:', response.data.message);
-          alert(response.data.message);
+          this.$message.error(response.data.message)
         }
       } catch (error) {
-        console.error('登录请求失败:', error);
-        alert('登录请求失败，请稍后再试');
+        console.error('登录失败:', error)
+        this.$message.error('登录失败，请稍后重试')
       }
-    },
-  },
-};
+    }
+  }
+}
 </script>
 
 <style scoped>
 .login-container {
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background: #f0f2f5;
-  position: relative; /* 新增 */
+  position: relative;
 }
 
-.login-card {
+.login-box {
+  display: flex;
+  width: 900px;
+  height: 500px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.login-left {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-bg {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
+  opacity: 0.9;
+}
+
+.login-right {
   width: 400px;
   padding: 20px;
 }
 
+.login-card {
+  border: none;
+  box-shadow: none !important;
+}
+
 .login-header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .logo {
-  width: 100px;
+  width: 80px;
   height: auto;
+  margin-bottom: 15px;
+}
+
+.login-header h1 {
+  font-size: 24px;
+  color: #333;
+  margin: 0;
 }
 
 .login-form h2 {
+  font-size: 18px;
+  color: #666;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+}
+
+:deep(.el-input__wrapper) {
+  padding: 1px 11px;
+}
+
+:deep(.el-input__inner) {
+  height: 40px;
+}
+
+.remember-me {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 20px 0;
 }
 
 .forget-password {
-  float: right;
-  font-size: 12px;
+  color: #409EFF;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.forget-password:hover {
+  color: #66b1ff;
+}
+
+.login-button {
+  width: 100%;
+  height: 40px;
+  font-size: 16px;
 }
 
 .copyright {
-  position: absolute; /* 新增 */
-  bottom: 10px; /* 调整到页面底部，并增加一些空隙 */
-  width: 100%; /* 确保它占满整个宽度 */
-  text-align: center; /* 居中对齐文本 */
-  font-size: 12px; /* 字体大小可以根据需要调整 */
-  color: #999; /* 灰色文本 */
+  position: absolute;
+  bottom: 20px;
+  color: #666;
+  font-size: 12px;
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 992px) {
+  .login-box {
+    width: 90%;
+    height: auto;
+    flex-direction: column;
+  }
+
+  .login-left {
+    display: none;
+  }
+
+  .login-right {
+    width: 100%;
+    padding: 30px;
+  }
 }
 </style>
