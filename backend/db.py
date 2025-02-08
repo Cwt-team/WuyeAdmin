@@ -1,12 +1,46 @@
 # db.py
 from flask_sqlalchemy import SQLAlchemy
+from flask import current_app
 
+# 创建全局 SQLAlchemy 实例
 db = SQLAlchemy()
 
 def init_db(app):
+    """初始化数据库"""
+    # 配置数据库
+    app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:123456@localhost:3326/wuye"
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_ECHO'] = True  # 输出SQL语句，方便调试
+    
+    # 初始化 SQLAlchemy
     db.init_app(app)
+    
+    # 创建所有表
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all()
+            print("数据库表创建成功！")
+        except Exception as e:
+            print(f"数据库表创建失败：{str(e)}")
+            raise e
+
+def test_db_models():
+    """测试数据库模型"""
+    try:
+        # 测试查询community_info表
+        from models import CommunityInfo
+        communities = CommunityInfo.query.all()
+        print(f"成功查询到{len(communities)}个小区信息")
+        
+        # 测试查询admin_role表
+        from models import AdminRole
+        roles = AdminRole.query.all()
+        print(f"成功查询到{len(roles)}个管理员角色")
+        
+        return True
+    except Exception as e:
+        print(f"数据库模型测试失败：{str(e)}")
+        return False
 
 # 创建一个示例模型
 class User(db.Model):
