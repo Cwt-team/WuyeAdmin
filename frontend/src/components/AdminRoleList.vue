@@ -108,7 +108,7 @@
 
 <script>
 import { Search } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import axios from 'axios'
 
 export default {
   name: 'AdminRoleList',
@@ -159,18 +159,24 @@ export default {
   methods: {
     async fetchRoles() {
       try {
-        // 实际项目中这里应该调用API
-        // const response = await axios.get('/api/roles', {
-        //   params: {
-        //     search: this.search,
-        //     page: this.currentPage,
-        //     size: this.pageSize
-        //   }
-        // });
-        // this.roleList = response.data.list;
-        // this.total = response.data.total;
+        const response = await axios.get('/api/admin-roles', {
+          params: {
+            search: this.search,
+            page: this.currentPage,
+            size: this.pageSize
+          }
+        });
+        if (response.data.success) {
+          this.roleList = response.data.data.list;
+          this.total = response.data.data.total;
+          this.$message.success('获取角色列表成功');
+        } else {
+          throw new Error(response.data.message);
+        }
       } catch (error) {
-        ElMessage.error('获取角色列表失败')
+        console.error('获取角色列表失败:', error);
+        this.$message.error('获取角色列表失败，显示模拟数据');
+        // 使用组件中已定义的模拟数据
       }
     },
 
@@ -205,30 +211,38 @@ export default {
     },
 
     async submitRole() {
-      this.$refs.roleForm.validate(async (valid) => {
-        if (valid) {
-          try {
-            // 实际项目中这里应该调用API
-            // const response = await axios.post('/api/roles', this.roleForm);
-            ElMessage.success(this.dialogTitle === '添加角色' ? '添加成功' : '修改成功')
-            this.dialogVisible = false
-            this.fetchRoles()
-          } catch (error) {
-            ElMessage.error('操作失败')
-          }
+      try {
+        await this.$refs.roleForm.validate();
+        const url = this.dialogTitle === '添加角色' ? '/api/admin-roles' : `/api/admin-roles/${this.roleForm.id}`;
+        const method = this.dialogTitle === '添加角色' ? 'post' : 'put';
+        const response = await axios[method](url, this.roleForm);
+        
+        if (response.data.success) {
+          this.$message.success(response.data.message);
+          this.dialogVisible = false;
+          this.fetchRoles();
+        } else {
+          throw new Error(response.data.message);
         }
-      })
+      } catch (error) {
+        console.error('保存角色失败:', error);
+        this.$message.error('保存角色失败');
+      }
     },
 
     async confirmDelete() {
       try {
-        // 实际项目中这里应该调用API
-        // await axios.delete(`/api/roles/${this.deleteId}`);
-        ElMessage.success('删除成功')
-        this.deleteDialogVisible = false
-        this.fetchRoles()
+        const response = await axios.delete(`/api/admin-roles/${this.deleteId}`);
+        if (response.data.success) {
+          this.$message.success(response.data.message);
+          this.deleteDialogVisible = false;
+          this.fetchRoles();
+        } else {
+          throw new Error(response.data.message);
+        }
       } catch (error) {
-        ElMessage.error('删除失败')
+        console.error('删除角色失败:', error);
+        this.$message.error('删除角色失败');
       }
     },
 

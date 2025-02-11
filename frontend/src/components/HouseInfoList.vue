@@ -1,9 +1,3 @@
- 了解,我会给出完整的代码实现,包括所有原有功能以及新增的区域层级筛选功能。
-
-
-
-
-```vue
 <template>
   <div class="house-management">
     <!-- Left Sidebar -->
@@ -26,464 +20,302 @@
           </template>
         </el-tree>
       </el-card>
+      <div 
+        class="toggle-sidebar" 
+        :class="{ collapsed: isSidebarCollapsed }"
+        @click="toggleSidebar"
+      >
+        <i :class="isSidebarCollapsed ? 'el-icon-arrow-right' : 'el-icon-arrow-left'"></i>
+      </div>
     </div>
 
     <!-- Right Content -->
     <div class="content">
       <el-card>
-        <div v-if="loading" class="loading-overlay">
-          <i class="el-icon-loading loading-spinner"></i>
-          <span class="loading-text">加载中...</span>
-        </div>
-
-        <el-row :gutter="20" class="filter-row">
+        <el-row :gutter="20" class="mb-4">
           <el-col :span="6">
-            <el-input v-model="searchParams.community" placeholder="小区名称" class="filter-item" />
+            <el-input
+              v-model="search.keyword"
+              placeholder="请输入关键字"
+              clearable
+            />
           </el-col>
-          <el-col :span="6">
-            <el-input v-model="searchParams.building" placeholder="楼栋号" class="filter-item" />
-          </el-col>
-          <el-col :span="6">
-            <el-input v-model="searchParams.houseNumber" placeholder="房屋编号" class="filter-item" />
-          </el-col>
-          <el-col :span="6">
-            <el-button type="primary" @click="searchHouse">搜索</el-button>
-            <el-button @click="resetSearch">重置</el-button>
+          <el-col :span="12">
+            <el-button type="primary" @click="searchHouses">查询</el-button>
+            <el-button type="success" @click="addHouse">添加房屋</el-button>
           </el-col>
         </el-row>
 
-        <el-table
-          :data="houseList"
-          style="width: 100%"
-          class="house-table"
-          v-loading="loading"
-          @selection-change="handleSelectionChange"
-          :empty-text="emptyText"
-          :row-class-name="tableRowClassName"
-        >
-          <el-table-column type="selection" width="55" />
-          <el-table-column prop="community" label="小区" width="120" />
-          <el-table-column prop="building" label="楼栋" width="100" />
-          <el-table-column prop="unit" label="单元" width="100" />
-          <el-table-column prop="houseNumber" label="房屋编号" width="120" />
-          <el-table-column prop="level" label="房产层级" width="100" />
-          <el-table-column prop="layout" label="户型" width="120" />
-          <el-table-column prop="owner" label="业主" width="120" />
-          <el-table-column prop="area" label="面积" width="100" />
-          <el-table-column prop="createTime" label="创建时间" width="180" :formatter="formatDate" />
-          <el-table-column prop="status" label="状态" width="100" :formatter="formatStatus" />
-          <el-table-column label="操作" width="200" fixed="right">
+        <el-table :data="houseList" style="width: 100%" v-loading="loading">
+          <el-table-column prop="fullName" label="房屋地址" />
+          <el-table-column prop="districtNumber" label="区号" />
+          <el-table-column prop="buildingNumber" label="栋号" />
+          <el-table-column prop="unitNumber" label="单元号" />
+          <el-table-column prop="createTime" label="创建时间" />
+          <el-table-column label="操作" width="250">
             <template #default="scope">
-              <el-button type="text" size="small" @click="viewDetails(scope.row)">查看详情</el-button>
-              <el-button type="text" size="small" @click="addTenant(scope.row)">添加租户</el-button>
-              <el-button type="text" size="small" @click="deleteHouse(scope.row)" class="delete-btn">删除</el-button>
+              <el-button 
+                type="primary" 
+                size="small" 
+                @click="editHouse(scope.row)"
+              >编辑</el-button>
+              <el-button 
+                type="danger" 
+                size="small" 
+                @click="deleteHouse(scope.row)"
+              >删除</el-button>
             </template>
           </el-table-column>
         </el-table>
 
-        <div class="table-footer">
-          <div class="batch-actions">
-            <el-button
-              type="danger"
-              :disabled="selectedHouses.length === 0"
-              :loading="batchLoading"
-              @click="batchDelete"
-            >
-              批量删除 ({{ selectedHouses.length }})
-            </el-button>
-          </div>
-
-          <el-pagination
-            background
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="total"
-            :current-page="currentPage"
-            :page-size="pageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            @current-change="handlePageChange"
-            @size-change="handleSizeChange"
-          >
-            <template #default>
-              <span class="pagination-total">共 {{ total }} 条</span>
-            </template>
-          </el-pagination>
-        </div>
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :total="total"
+          :current-page="currentPage"
+          :page-size="pageSize"
+          @current-change="handlePageChange"
+        />
       </el-card>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
-import moment from 'moment';
+import axios from 'axios'
 
 export default {
-  name: 'HouseManagement',
+  name: 'HouseInfoList',
   data() {
     return {
-      loading: false,
-      batchLoading: false,
-      emptyText: '暂无数据',
-      searchParams: {
-        community: '',
-        building: '',
-        houseNumber: '',
-        areaId: null,
-        buildingId: null,
-        unitId: null
+      search: {
+        keyword: '',
+        communityId: null,
+        parentId: null
       },
+      loading: false,
       houseList: [],
-      selectedHouses: [],
       total: 0,
       currentPage: 1,
       pageSize: 10,
-      // Tree data structure
-      areaData: [
+      areaData: [],
+      defaultProps: {
+        children: 'children',
+        label: 'fullName'
+      },
+      // 模拟数据
+      mockData: [
         {
-          id: 'area1',
-          label: '东区',
-          count: 120,
-          children: [
-            {
-              id: 'building1',
-              label: '1栋',
-              count: 40,
-              children: [
-                {
-                  id: 'unit1',
-                  label: '1单元',
-                  count: 20
-                },
-                {
-                  id: 'unit2',
-                  label: '2单元',
-                  count: 20
-                }
-              ]
-            },
-            {
-              id: 'building2',
-              label: '2栋',
-              count: 80,
-              children: [
-                {
-                  id: 'unit3',
-                  label: '1单元',
-                  count: 40
-                },
-                {
-                  id: 'unit4',
-                  label: '2单元',
-                  count: 40
-                }
-              ]
-            }
-          ]
+          id: 1,
+          fullName: '阳光花园1区1栋1单元',
+          districtNumber: '1',
+          buildingNumber: '1',
+          unitNumber: '1',
+          createTime: '2024-02-08 10:00:00'
         },
         {
-          id: 'area2',
-          label: '西区',
-          count: 150,
+          id: 2,
+          fullName: '阳光花园1区1栋2单元',
+          districtNumber: '1',
+          buildingNumber: '1',
+          unitNumber: '2',
+          createTime: '2024-02-08 10:30:00'
+        }
+      ],
+      mockAreaData: [
+        {
+          id: 1,
+          fullName: '1区',
+          count: 2,
           children: [
             {
-              id: 'building3',
-              label: '1栋',
-              count: 75,
+              id: 2,
+              fullName: '1栋',
+              count: 2,
               children: [
                 {
-                  id: 'unit5',
-                  label: '1单元',
-                  count: 25
-                },
-                {
-                  id: 'unit6',
-                  label: '2单元',
-                  count: 25
-                },
-                {
-                  id: 'unit7',
-                  label: '3单元',
-                  count: 25
+                  id: 3,
+                  fullName: '1单元',
+                  count: 0
                 }
               ]
             }
           ]
         }
       ],
-      defaultProps: {
-        children: 'children',
-        label: 'label'
-      }
-    };
+      isSidebarCollapsed: false
+    }
   },
   methods: {
-    handleNodeClick(data, node) {
-      // Clear previous search params
-      this.searchParams = {
-        ...this.searchParams,
-        areaId: null,
-        buildingId: null,
-        unitId: null
-      };
-
-      // Set the appropriate filter based on the node level
-      if (node.level === 1) { // Area level
-        this.searchParams.areaId = data.id;
-      } else if (node.level === 2) { // Building level
-        this.searchParams.areaId = node.parent.data.id;
-        this.searchParams.buildingId = data.id;
-      } else if (node.level === 3) { // Unit level
-        this.searchParams.areaId = node.parent.parent.data.id;
-        this.searchParams.buildingId = node.parent.data.id;
-        this.searchParams.unitId = data.id;
-      }
-
-      this.currentPage = 1;
-      this.fetchHouses();
-    },
-
     async fetchHouses() {
-      this.loading = true;
+      this.loading = true
       try {
         const response = await axios.get('/api/houses', {
           params: {
-            ...this.searchParams,
+            keyword: this.search.keyword,
+            communityId: this.search.communityId,
+            parentId: this.search.parentId,
             page: this.currentPage,
-            size: this.pageSize,
-          },
-        });
-        this.houseList = response.data.houses;
-        this.total = response.data.total;
-        this.$message.success('数据加载成功');
+            size: this.pageSize
+          }
+        })
+        
+        if (response.data.success) {
+          this.houseList = response.data.data
+          this.total = response.data.data.length
+          this.$message.success('数据加载成功')
+        } else {
+          throw new Error('获取数据失败')
+        }
       } catch (error) {
-        console.error('获取房屋信息失败:', error);
-        this.$message.error('获取房屋信息失败');
-        // 加载模拟数据
-        this.houseList = this.getMockData();
-        this.total = this.houseList.length;
-        this.$message.success('已加载模拟数据');
+        console.error('获取房屋列表失败:', error)
+        this.$message.warning('获取数据失败，显示模拟数据')
+        this.houseList = this.mockData
+        this.total = this.mockData.length
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
 
-    getMockData() {
-      return [
-        {
-          id: 1,
-          community: '阳光花园',
-          building: '1栋',
-          unit: '1单元',
-          houseNumber: '101',
-          level: '1层',
-          layout: '三室一厅',
-          owner: '张三',
-          area: 120,
-          createTime: '2023-01-01 10:00:00',
-          status: 'occupied'
-        },
-        {
-          id: 2,
-          community: '幸福家园',
-          building: '2栋',
-          unit: '2单元',
-          houseNumber: '202',
-          level: '2层',
-          layout: '两室一厅',
-          owner: '李四',
-          area: 90,
-          createTime: '2023-02-01 14:00:00',
-          status: 'vacant'
-        },
-        {
-          id: 3,
-          community: '和谐小区',
-          building: '3栋',
-          unit: '1单元',
-          houseNumber: '303',
-          level: '3层',
-          layout: '四室两厅',
-          owner: '王五',
-          area: 150,
-          createTime: '2023-03-01 09:00:00',
-          status: 'occupied'
-        },
-        {
-          id: 4,
-          community: '平安小区',
-          building: '4栋',
-          unit: '2单元',
-          houseNumber: '404',
-          level: '4层',
-          layout: '一室一厅',
-          owner: '赵六',
-          area: 60,
-          createTime: '2023-04-01 16:00:00',
-          status: 'vacant'
-        }
-      ];
-    },
-
-    resetSearch() {
-      this.searchParams = {
-        community: '',
-        building: '',
-        houseNumber: '',
-        areaId: null,
-        buildingId: null,
-        unitId: null
-      };
-      this.$refs.tree.setCurrentKey(null);
-      this.currentPage = 1;
-      this.fetchHouses();
-    },
-
-    handleSelectionChange(selection) {
-      this.selectedHouses = selection;
-    },
-
-    async batchDelete() {
+    async fetchAreaTree() {
       try {
-        await this.$confirm('确定要删除选中的房屋信息吗？', '提示', {
+        const response = await axios.get('/api/houses', {
+          params: {
+            communityId: this.search.communityId
+          }
+        })
+        
+        if (response.data.success) {
+          this.areaData = this.buildTree(response.data.data)
+        } else {
+          throw new Error('获取区域树失败')
+        }
+      } catch (error) {
+        console.error('获取区域树失败:', error)
+        this.$message.warning('获取区域树失败，显示模拟数据')
+        this.areaData = this.mockAreaData
+      }
+    },
+
+    buildTree(data) {
+      // 构建树形结构
+      const map = {}
+      const result = []
+
+      // 首先创建所有节点的映射
+      data.forEach(item => {
+        map[item.id] = {
+          ...item,
+          children: []
+        }
+      })
+
+      // 构建树形结构
+      data.forEach(item => {
+        const node = map[item.id]
+        if (item.parentId) {
+          const parent = map[item.parentId]
+          if (parent) {
+            parent.children.push(node)
+          }
+        } else {
+          result.push(node)
+        }
+      })
+
+      return result
+    },
+
+    handleNodeClick(data) {
+      this.search.parentId = data.id
+      this.fetchHouses()
+    },
+
+    searchHouses() {
+      this.currentPage = 1
+      this.fetchHouses()
+    },
+
+    async addHouse() {
+      // 添加房屋的逻辑
+    },
+
+    async editHouse() {
+      // 编辑房屋的逻辑
+    },
+
+    async deleteHouse(row) {
+      try {
+        await this.$confirm('确认删除该房屋信息吗？', '提示', {
           type: 'warning'
-        });
-        this.batchLoading = true;
-        const houseIds = this.selectedHouses.map(house => house.id);
-        await axios.delete('/api/houses', { data: { ids: houseIds } });
-        this.$message.success('删除成功');
-        this.selectedHouses = [];
-        await this.fetchHouses();
+        })
+        
+        const response = await axios.delete(`/api/houses/${row.id}`)
+        if (response.data.success) {
+          this.$message.success('删除成功')
+          this.fetchHouses()
+          this.fetchAreaTree()
+        }
       } catch (error) {
         if (error !== 'cancel') {
-          this.$message.error('删除失败');
+          console.error('删除房屋失败:', error)
+          this.$message.error('删除失败')
         }
-      } finally {
-        this.batchLoading = false;
       }
-    },
-
-    async deleteHouse(house) {
-      try {
-        await this.$confirm('确定要删除该房屋信息吗？', '提示', {
-          type: 'warning'
-        });
-        this.loading = true;
-        await axios.delete(`/api/houses/${house.id}`);
-        this.$message.success('删除成功');
-        await this.fetchHouses();
-      } catch (error) {
-        if (error !== 'cancel') {
-          this.$message.error('删除失败');
-        }
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    async addTenant(house) {
-      try {
-        const { value } = await this.$prompt('请输入租户姓名', '添加租户', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          inputPattern: /^.{2,20}$/,
-          inputErrorMessage: '姓名长度应在2-20个字符之间'
-        });
-
-        this.loading = true;
-        await axios.post(`/api/houses/${house.id}/tenants`, {
-          name: value
-        });
-
-        this.$notify({
-          title: '成功',
-          message: `已成功添加租户 ${value}`,
-          type: 'success',
-          duration: 2000
-        });
-
-        await this.fetchHouses();
-      } catch (error) {
-        if (error !== 'cancel') {
-          this.$notify.error({
-            title: '错误',
-            message: '添加租户失败，请稍后重试',
-            duration: 2000
-          });
-        }
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    formatDate(row, column, cellValue) {
-      return cellValue ? moment(cellValue).format('YYYY-MM-DD HH:mm') : '';
-    },
-
-    formatStatus(row, column, cellValue) {
-      return cellValue === 'occupied' ? '已入住' : '未入住';
-    },
-
-    searchHouse() {
-      this.currentPage = 1;
-      this.fetchHouses();
     },
 
     handlePageChange(page) {
-      this.currentPage = page;
-      this.fetchHouses();
+      this.currentPage = page
+      this.fetchHouses()
     },
 
-    handleSizeChange(size) {
-      this.pageSize = size;
-      this.currentPage = 1;
-      this.fetchHouses();
-    },
-
-    viewDetails(row) {
-      this.$router.push({
-        name: 'HouseDetail',
-        params: { id: row.id }
-      });
-    },
-
-    tableRowClassName({ row }) {
-      return row.status === 'occupied' ? 'occupied-row' : '';
+    toggleSidebar() {
+      this.isSidebarCollapsed = !this.isSidebarCollapsed
     }
   },
   mounted() {
-    this.fetchHouses();
+    this.fetchHouses()
+    this.fetchAreaTree()
   }
-};
+}
 </script>
 
 <style scoped>
 .house-management {
-  height: 100%;
   display: flex;
-  gap: 20px;
   padding: 20px;
+  height: calc(100vh - 84px);
+  background-color: var(--el-bg-color);
 }
 
 .sidebar {
-  width: 280px;
-  flex-shrink: 0;
+  width: 300px;
+  transition: width 0.3s;
+  margin-right: 20px;
+}
+
+.sidebar.collapsed {
+  width: 0;
+  margin-right: 0;
 }
 
 .content {
   flex: 1;
-  min-width: 0;
+  overflow: auto;
+  background-color: var(--el-bg-color);
 }
 
 .tree-card {
   height: 100%;
+  overflow: auto;
 }
 
 .tree-header {
-  font-size: 16px;
+  margin-bottom: 15px;
   font-weight: bold;
-  padding: 0 0 16px;
-  border-bottom: 1px solid #EBEEF5;
-  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .custom-tree-node {
@@ -491,230 +323,83 @@ export default {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding-right: 8px;
 }
 
 .count {
-  color: #909399;
+  color: #999;
   font-size: 12px;
 }
 
-.filter-row {
+.mb-4 {
   margin-bottom: 16px;
 }
 
-.filter-item {
-  width: 100%;
+.filter-row {
+  margin-bottom: 20px;
 }
 
-.house-table {
-  margin: 16px 0;
-}
-
-.table-footer {
+.toggle-sidebar {
+  position: absolute;
+  left: 300px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--el-color-primary);
+  color: white;
+  width: 20px;
+  height: 50px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #EBEEF5;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 0 4px 4px 0;
+  transition: left 0.3s;
+  z-index: 1;
 }
 
-.batch-actions {
-  margin-right: 16px;
-}
-
-.delete-btn {
-  color: #F56C6C;
+.toggle-sidebar.collapsed {
+  left: 0;
 }
 
 .loading-overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.7);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 1000;
 }
 
 .loading-spinner {
-  font-size: 40px;
-  color: #409EFF;
-  margin-bottom: 16px;
-  animation: spin 1s linear infinite;
+  font-size: 32px;
+  margin-bottom: 10px;
 }
 
 .loading-text {
-  font-size: 16px;
-  color: #606266;
+  color: var(--el-text-color-secondary);
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.el-button--text {
-  padding: 0 4px;
-  margin-right: 8px;
-}
-
-.el-button--danger {
-  margin-left: 8px;
-}
-
-.occupied-row {
-  background-color: #f0f9eb;
-}
-
-.occupied-row:hover {
-  background-color: #e1f3d8 !important;
-}
-
-.el-table {
-  font-size: 13px;
-}
-
-.el-table .cell {
-  padding: 6px 0;
-}
-
-.el-table .el-table__row {
-  height: 40px;
-}
-
-.el-table .el-table__row:hover {
-  background-color: #f5f7fa;
-}
-
-.el-table--striped .el-table__body tr.el-table__row--striped td {
-  background-color: #fafafa;
-}
-
-.custom-pagination {
-  margin-top: 16px;
-  padding: 16px 0;
-  text-align: right;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 16px;
-}
-
-.pagination-total {
-  font-size: 14px;
-  color: #606266;
-  margin-right: 16px;
-}
-
-.custom-pagination .el-pagination__total {
-  margin-right: auto;
-}
-
-.custom-pagination .el-pagination__sizes {
-  margin: 0 16px;
-}
-
-.custom-pagination .el-pagination__jump {
-  margin-left: 16px;
-}
-
-/* 树形控件样式调整 */
-:deep(.el-tree-node__content) {
-  height: 32px;
-}
-
-:deep(.el-tree-node.is-current > .el-tree-node__content) {
-  background-color: #ecf5ff;
-}
-
-:deep(.el-tree) {
-  background: none;
-}
-
-:deep(.el-tree-node:focus > .el-tree-node__content) {
-  background-color: #f5f7fa;
-}
-
-:deep(.el-tree-node__content:hover) {
-  background-color: #f5f7fa;
-}
-
-/* 卡片内容区域样式 */
-.el-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.el-card__body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-}
-
-/* 响应式布局调整 */
-@media screen and (max-width: 1200px) {
+/* 添加响应式布局 */
+@media screen and (max-width: 768px) {
   .house-management {
     flex-direction: column;
   }
-
+  
   .sidebar {
     width: 100%;
     margin-bottom: 20px;
   }
-
+  
   .tree-card {
-    height: auto;
+    height: 300px;
   }
-}
-
-/* 表格操作按钮样式 */
-.operation-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.operation-buttons .el-button {
-  padding: 4px 8px;
-}
-
-/* 搜索区域样式优化 */
-.search-area {
-  background-color: #f5f7fa;
-  padding: 16px;
-  border-radius: 4px;
-  margin-bottom: 16px;
-}
-
-/* 批量操作区样式 */
-.batch-operation-area {
-  background-color: #fff;
-  padding: 12px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
-  margin-bottom: 16px;
-}
-
-/* 空状态样式 */
-.no-data {
-  text-align: center;
-  padding: 40px 0;
-  color: #909399;
-}
-
-.no-data-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-
-.no-data-text {
-  font-size: 14px;
+  
+  .toggle-sidebar {
+    display: none;
+  }
 }
 </style>

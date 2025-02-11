@@ -29,9 +29,21 @@
         <el-table-column prop="createTime" label="创建时间" />
         <el-table-column label="操作" width="250">
           <template #default="scope">
-            <el-button type="primary" size="small" @click="editCommunity(scope.row)">编辑</el-button>
-            <el-button type="danger" size="small" @click="deleteCommunity(scope.row)">删除</el-button>
-            <el-button type="info" size="small" @click="showConfig(scope.row)">配置</el-button>
+            <el-button 
+              type="primary" 
+              size="small" 
+              @click="handleEdit(scope.row)"
+            >编辑</el-button>
+            <el-button 
+              type="primary" 
+              size="small" 
+              @click="showConfig(scope.row)"
+            >配置</el-button>
+            <el-button 
+              type="danger" 
+              size="small" 
+              @click="deleteCommunity(scope.row)"
+            >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -98,6 +110,33 @@
           </span>
         </template>
       </el-dialog>
+
+      <!-- 添加新的编辑/添加对话框 -->
+      <el-dialog 
+        :title="editDialogTitle" 
+        v-model="showEditDialog" 
+        width="500px"
+      >
+        <el-form 
+          :model="editForm" 
+          label-width="100px"
+          :rules="editRules"
+          ref="editFormRef"
+        >
+          <el-form-item label="小区名称" prop="name">
+            <el-input v-model="editForm.name" />
+          </el-form-item>
+          <el-form-item label="所在城市" prop="location">
+            <el-input v-model="editForm.location" />
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="showEditDialog = false">取消</el-button>
+            <el-button type="primary" @click="submitEdit">确定</el-button>
+          </span>
+        </template>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -132,6 +171,17 @@ export default {
         isRecordUpload: true
       },
       configRules: {
+        name: [{ required: true, message: '请输入小区名称', trigger: 'blur' }],
+        location: [{ required: true, message: '请输入所在城市', trigger: 'blur' }]
+      },
+      showEditDialog: false,
+      editDialogTitle: '',
+      editForm: {
+        id: null,
+        name: '',
+        location: ''
+      },
+      editRules: {
         name: [{ required: true, message: '请输入小区名称', trigger: 'blur' }],
         location: [{ required: true, message: '请输入所在城市', trigger: 'blur' }]
       },
@@ -272,6 +322,63 @@ export default {
       this.dialogTitle = '小区配置'
       this.configForm = { ...row }
       this.showConfigDialog = true
+    },
+
+    handleEdit(row) {
+      this.editDialogTitle = '编辑小区'
+      this.editForm = {
+        id: row.id,
+        name: row.name,
+        location: row.location
+      }
+      this.showEditDialog = true
+    },
+
+    async submitEdit() {
+      try {
+        const formRef = this.$refs.editFormRef
+        await formRef.validate()
+        
+        if (this.editForm.id) {
+          // 编辑
+          const response = await axios.put(`/api/communities/${this.editForm.id}`, {
+            name: this.editForm.name,
+            location: this.editForm.location
+          })
+          if (response.data.success) {
+            this.$message.success('更新成功')
+          }
+        } else {
+          // 新增
+          const response = await axios.post('/api/communities', {
+            name: this.editForm.name,
+            location: this.editForm.location
+          })
+          if (response.data.success) {
+            this.$message.success('添加成功')
+          }
+        }
+        
+        this.showEditDialog = false
+        this.fetchCommunities()
+      } catch (error) {
+        if (error.message) {
+          this.$message.error(error.message)
+        } else {
+          console.error('保存小区失败:', error)
+          this.$message.error('保存失败')
+        }
+      }
+    },
+
+    handleAdd() {
+      this.editDialogTitle = '添加小区'
+      this.editForm = {
+        id: null,
+        name: '',
+        location: ''
+      }
+      this.showEditDialog = true
     }
   },
   mounted() {

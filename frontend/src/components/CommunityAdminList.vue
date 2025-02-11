@@ -68,7 +68,12 @@
         </el-form-item>
         <el-form-item label="角色" prop="role" required>
           <el-select v-model="adminForm.role" class="w-full">
-            <el-option label="12312" value="12312" />
+            <el-option
+              v-for="role in roleOptions"
+              :key="role.id"
+              :label="role.name"
+              :value="role.id"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="手机号码" prop="phone">
@@ -157,7 +162,8 @@ export default {
       total: 0,
       currentPage: 1,
       pageSize: 10,
-      dialogTitle: '添加小区管理员'
+      dialogTitle: '添加小区管理员',
+      roleOptions: [], // 添加角色选项数组
     };
   },
   methods: {
@@ -167,13 +173,18 @@ export default {
           params: {
             name: this.search.name,
             username: this.search.username,
+            communityId: this.selectedCompany,
             page: this.currentPage,
             size: this.pageSize,
           },
         });
-        this.adminList = response.data.admins;
-        this.total = response.data.total;
-        this.$message.success('数据加载成功');
+        if (response.data.success) {
+          this.adminList = response.data.data.admins;
+          this.total = response.data.data.total;
+          this.$message.success('数据加载成功');
+        } else {
+          throw new Error(response.data.message);
+        }
       } catch (error) {
         console.error('获取管理员信息失败:', error);
         this.$message.error('获取管理员信息失败');
@@ -226,36 +237,59 @@ export default {
       this.$refs.adminForm.validate(async (valid) => {
         if (valid) {
           try {
-            // 实际项目中这里应该调用API
-            // const response = await axios.post('/api/admins', this.adminForm);
-            ElMessage.success(this.dialogTitle === '添加小区管理员' ? '添加成功' : '修改成功');
-            this.showAddDialog = false;
-            this.fetchAdmins();
+            const url = this.dialogTitle === '添加小区管理员' ? '/api/admins' : `/api/admins/${this.adminForm.id}`;
+            const method = this.dialogTitle === '添加小区管理员' ? 'post' : 'put';
+            const response = await axios[method](url, this.adminForm);
+            
+            if (response.data.success) {
+              this.$message.success(response.data.message);
+              this.showAddDialog = false;
+              this.fetchAdmins();
+            } else {
+              throw new Error(response.data.message);
+            }
           } catch (error) {
-            ElMessage.error('操作失败');
+            console.error('保存管理员失败:', error);
+            this.$message.error(error.response?.data?.message || '操作失败');
           }
         }
       });
     },
     async confirmDelete() {
       try {
-        // 实际项目中这里应该调用API
-        // await axios.delete(`/api/admins/${this.deleteAdminData.username}`);
-        ElMessage.success('删除成功');
-        this.deleteDialogVisible = false;
-        this.deleteAdminData = null; // 重置删除数据
-        this.fetchAdmins();
+        const response = await axios.delete(`/api/admins/${this.deleteAdminData.id}`);
+        if (response.data.success) {
+          this.$message.success('删除成功');
+          this.deleteDialogVisible = false;
+          this.deleteAdminData = null;
+          this.fetchAdmins();
+        } else {
+          throw new Error(response.data.message);
+        }
       } catch (error) {
-        ElMessage.error('删除失败');
+        console.error('删除管理员失败:', error);
+        this.$message.error(error.response?.data?.message || '删除失败');
       }
     },
     handleSizeChange(size) {
       this.pageSize = size;
       this.fetchAdmins();
     },
+    async fetchRoles() {
+      try {
+        const response = await axios.get('/api/admin-roles');
+        if (response.data.success) {
+          this.roleOptions = response.data.data.list;
+        }
+      } catch (error) {
+        console.error('获取角色列表失败:', error);
+        this.$message.error('获取角色列表失败');
+      }
+    },
   },
   mounted() {
     this.fetchAdmins();
+    this.fetchRoles();
   },
 };
 </script>

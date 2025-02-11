@@ -2,6 +2,11 @@ from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 from db import db, init_db
 from routes.community import community_bp
+from routes.house import house_bp
+from routes.admin_role import admin_role_bp
+from routes.community_admin import community_admin_bp
+from routes.property_admin import property_admin_bp
+from routes.owner import owner_bp
 
 def create_app():
     app = Flask(__name__)
@@ -13,6 +18,11 @@ def create_app():
 
     # 注册蓝图
     app.register_blueprint(community_bp)
+    app.register_blueprint(house_bp)
+    app.register_blueprint(admin_role_bp)
+    app.register_blueprint(community_admin_bp)
+    app.register_blueprint(property_admin_bp)
+    app.register_blueprint(owner_bp)
 
     # 获取用户信息的API
     @app.route('/api/user-info', methods=['GET'])
