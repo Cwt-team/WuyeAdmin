@@ -1,77 +1,128 @@
 <template>
   <div class="room-notification-list">
     <el-card>
+      <el-alert
+        v-if="!selectedHouse"
+        title="请先选择房号，再发送通知！"
+        type="warning"
+        show-icon
+        :closable="false"
+      />
+      
+      <el-row class="filter-row" :gutter="10">
+        <el-col :span="4">
+          <el-select 
+            v-model="filter.community" 
+            placeholder="选择社区" 
+            class="filter-item"
+            @change="handleCommunityChange"
+          >
+            <el-option 
+              v-for="item in communityOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-col>
+        <el-col :span="3">
+          <el-select 
+            v-model="filter.district" 
+            placeholder="选择区" 
+            class="filter-item"
+            @change="handleDistrictChange"
+          >
+            <el-option 
+              v-for="item in districtOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-col>
+        <el-col :span="3">
+          <el-select 
+            v-model="filter.building" 
+            placeholder="选择栋" 
+            class="filter-item"
+            @change="handleBuildingChange"
+          >
+            <el-option 
+              v-for="item in buildingOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-col>
+        <el-col :span="3">
+          <el-select 
+            v-model="filter.unit" 
+            placeholder="选择单元" 
+            class="filter-item"
+          >
+            <el-option 
+              v-for="item in unitOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-col>
+      </el-row>
+
       <el-row class="filter-row" :gutter="10">
         <el-col :span="4">
           <el-input v-model="filter.title" placeholder="标题" clearable class="filter-item" />
         </el-col>
-        <el-col :span="4">
-          <el-input v-model="filter.region" placeholder="区域" clearable class="filter-item" />
-        </el-col>
-        <el-col :span="4">
-          <el-input v-model="filter.building" placeholder="楼栋" clearable class="filter-item" />
-        </el-col>
-        <el-col :span="4">
-          <el-input v-model="filter.unit" placeholder="单元" clearable class="filter-item" />
-        </el-col>
-      </el-row>
-      <el-row class="filter-row" :gutter="10">
-        <el-col :span="4">
-          <el-input v-model="filter.floor" placeholder="楼层" clearable class="filter-item" />
-        </el-col>
-        <el-col :span="4">
-          <el-input v-model="filter.roomNumber" placeholder="房号" clearable class="filter-item" />
-        </el-col>
         <el-col :span="6">
           <el-date-picker
-            v-model="filter.publishDateRange"
+            v-model="filter.dateRange"
             type="daterange"
             range-separator="至"
-            start-placeholder="发布开始日期"
-            end-placeholder="发布结束日期"
-            value-format="yyyy-MM-dd"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            value-format="YYYY-MM-DD"
             class="filter-item"
           />
         </el-col>
         <el-col :span="2">
-          <el-button type="primary" :loading="searchLoading" @click="searchNotifications">查询</el-button>
+          <el-button type="primary" :loading="loading" @click="searchNotifications">查询</el-button>
         </el-col>
-        <el-col :span="2" style="text-align: right;">
-          <el-button type="primary" @click="addNotification">添加房间通知</el-button>
+        <el-col :span="2">
+          <el-button 
+            type="primary" 
+            @click="addNotification"
+            :disabled="!selectedHouse"
+          >
+            房间通知
+          </el-button>
         </el-col>
       </el-row>
 
       <el-table :data="notificationList" style="width: 100%" v-loading="loading">
         <el-table-column prop="title" label="标题"/>
         <el-table-column prop="content" label="内容"/>
-        <el-table-column prop="publishDate" label="发布时间" width="150">
-          <template #default="scope">
-            {{ formatDate(scope.row.publishDate) }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="validUntil" label="有效期至" width="150">
-          <template #default="scope">
-            {{ formatDate(scope.row.validUntil) }}
-          </template>
-        </el-table-column>
+        <el-table-column prop="displayStartTime" label="展示开始时间" width="180"/>
+        <el-table-column prop="displayEndTime" label="展示结束时间" width="180"/>
         <el-table-column label="操作" width="150">
           <template #default="scope">
-            <el-button type="primary" link size="small" @click="editNotification(scope.row)">编辑</el-button>
-            <el-button type="danger" link size="small" @click="deleteNotification(scope.row)">删除</el-button>
+            <el-button type="primary" link @click="editNotification(scope.row)">编辑</el-button>
+            <el-button type="danger" link @click="deleteNotification(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
 
       <div class="pagination-container">
         <el-pagination
-            background
-            layout="total, prev, pager, next, sizes, jumper"
-            :total="total"
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            @current-change="handlePageChange"
-            @size-change="handleSizeChange"
+          background
+          layout="total, prev, pager, next, sizes"
+          :total="total"
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
         />
       </div>
     </el-card>
@@ -79,136 +130,199 @@
 </template>
 
 <script>
-import axios from 'axios';
-import {ElMessage} from 'element-plus';
-import {useRouter} from 'vue-router'; // 引入 useRouter
+import axios from 'axios'
 
 export default {
-  name: 'RoomNotificationList',
-  setup() {
-    const router = useRouter(); // 获取 router 实例
-    return {
-      router,
-    };
-  },
+  name: 'RoomNotification',
   data() {
     return {
       loading: false,
-      searchLoading: false, // 控制查询按钮的 loading 状态
       filter: {
-        title: '',
-        region: '',
+        community: '',
+        district: '',
         building: '',
         unit: '',
-        floor: '',
-        roomNumber: '',
-        publishDateRange: null,
+        title: '',
+        dateRange: null
       },
+      selectedHouse: null,
+      communityOptions: [],
+      districtOptions: [],
+      buildingOptions: [],
+      unitOptions: [],
       notificationList: [],
       total: 0,
       currentPage: 1,
-      pageSize: 10,
-      exampleNotifications: [
-        {
-          title: '示例通知1',
-          content: '这是一个示例通知的内容，用于在数据加载失败时展示。',
-          publishDate: '2024-11-01',
-          validUntil: '2024-12-01',
-        },
-        {
-          title: '示例通知2',
-          content: '这是另一个示例通知的内容，用于在数据加载失败时展示。',
-          publishDate: '2024-11-05',
-          validUntil: '2024-12-05',
-        },
-      ],
-    };
-  },
-  watch: {
-    // eslint-disable-next-line no-unused-vars
-    'filter.publishDateRange'(newVal) {
-      // 可以根据需要处理日期范围
-    },
+      pageSize: 10
+    }
   },
   methods: {
-    formatDate(dateString) {
-      if (!dateString) return '';
-      const date = new Date(dateString);
-      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    async fetchCommunities() {
+      try {
+        const response = await axios.get('/api/communities')
+        this.communityOptions = response.data.map(item => ({
+          value: item.id,
+          label: item.communityName
+        }))
+      } catch (error) {
+        console.error('获取社区列表失败:', error)
+        this.$message.error('获取社区列表失败')
+      }
     },
-    addNotification() {
-      // 使用 vue-router 进行页面跳转
-      this.router.push('/room-notifications/add');
-      // 或者使用弹窗
-      // console.log('打开添加房间通知弹窗');
+
+    async handleCommunityChange() {
+      this.filter.district = ''
+      this.filter.building = ''
+      this.filter.unit = ''
+      this.selectedHouse = null
+      await this.fetchDistricts()
     },
+
+    async handleDistrictChange() {
+      this.filter.building = ''
+      this.filter.unit = ''
+      this.selectedHouse = null
+      await this.fetchBuildings()
+    },
+
+    async handleBuildingChange() {
+      this.filter.unit = ''
+      this.selectedHouse = null
+      await this.fetchUnits()
+    },
+
+    async fetchDistricts() {
+      if (!this.filter.community) return
+      try {
+        const response = await axios.get(`/api/districts`, {
+          params: { communityId: this.filter.community }
+        })
+        this.districtOptions = response.data
+      } catch (error) {
+        console.error('获取区域列表失败:', error)
+        this.$message.error('获取区域列表失败')
+      }
+    },
+
+    async fetchBuildings() {
+      if (!this.filter.district) return
+      try {
+        const response = await axios.get(`/api/buildings`, {
+          params: { 
+            communityId: this.filter.community,
+            districtId: this.filter.district
+          }
+        })
+        this.buildingOptions = response.data
+      } catch (error) {
+        console.error('获取楼栋列表失败:', error)
+        this.$message.error('获取楼栋列表失败')
+      }
+    },
+
+    async fetchUnits() {
+      if (!this.filter.building) return
+      try {
+        const response = await axios.get(`/api/units`, {
+          params: {
+            communityId: this.filter.community,
+            districtId: this.filter.district,
+            buildingId: this.filter.building
+          }
+        })
+        this.unitOptions = response.data
+      } catch (error) {
+        console.error('获取单元列表失败:', error)
+        this.$message.error('获取单元列表失败')
+      }
+    },
+
     async fetchNotifications() {
-      this.loading = true;
+      this.loading = true
       try {
         const params = {
-          page: this.currentPage,
-          size: this.pageSize,
+          communityId: this.filter.community,
+          districtId: this.filter.district,
+          buildingId: this.filter.building,
+          unitId: this.filter.unit,
           title: this.filter.title,
-          region: this.filter.region,
-          building: this.filter.building,
-          unit: this.filter.unit,
-          floor: this.filter.floor,
-          roomNumber: this.filter.roomNumber,
-        };
-        if (this.filter.publishDateRange) {
-          params.startDate = this.filter.publishDateRange[0];
-          params.endDate = this.filter.publishDateRange[1];
+          page: this.currentPage,
+          size: this.pageSize
         }
-        const response = await axios.get('/api/room-notifications', {params});
-        this.notificationList = response.data.records;
-        this.total = response.data.total;
+        if (this.filter.dateRange) {
+          params.startDate = this.filter.dateRange[0]
+          params.endDate = this.filter.dateRange[1]
+        }
+        const response = await axios.get('/api/room-notifications', { params })
+        this.notificationList = response.data.records
+        this.total = response.data.total
       } catch (error) {
-        console.error('获取房间通知失败:', error);
-        this.notificationList = [...this.exampleNotifications];
-        this.total = this.exampleNotifications.length;
-        ElMessage.error('获取房间通知数据失败，已展示示例数据。');
+        console.error('获取通知列表失败:', error)
+        this.$message.error('获取通知列表失败')
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
+
     searchNotifications() {
-      this.currentPage = 1;
-      this.fetchNotifications();
+      this.currentPage = 1
+      this.fetchNotifications()
     },
-    handlePageChange(newPage) {
-      this.currentPage = newPage;
-      this.fetchNotifications();
+
+    handlePageChange(page) {
+      this.currentPage = page
+      this.fetchNotifications()
     },
-    handleSizeChange(newSize) {
-      this.pageSize = newSize;
-      this.currentPage = 1;
-      this.fetchNotifications();
+
+    handleSizeChange(size) {
+      this.pageSize = size
+      this.currentPage = 1
+      this.fetchNotifications()
     },
+
+    addNotification() {
+      if (!this.selectedHouse) {
+        this.$message.warning('请先选择房号')
+        return
+      }
+      this.$router.push('/room-notifications/add')
+    },
+
     editNotification(row) {
-      console.log('编辑通知:', row);
-      // 跳转到编辑页面，传递通知 ID
-      this.router.push(`/room-notifications/edit/${row.id}`);
+      this.$router.push(`/room-notifications/edit/${row.id}`)
     },
+
     async deleteNotification(row) {
       try {
-        await axios.delete(`/api/room-notifications/${row.id}`);
-        ElMessage.success('删除通知成功');
-        this.fetchNotifications(); // 刷新列表
+        await this.$confirm('确认删除该通知?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+        await axios.delete(`/api/room-notifications/${row.id}`)
+        this.$message.success('删除成功')
+        this.fetchNotifications()
       } catch (error) {
-        console.error('删除通知失败:', error);
-        ElMessage.error('删除通知失败');
+        if (error !== 'cancel') {
+          console.error('删除通知失败:', error)
+          this.$message.error('删除通知失败')
+        }
       }
-    },
+    }
   },
   mounted() {
-    this.fetchNotifications();
-  },
-};
+    this.fetchCommunities()
+  }
+}
 </script>
 
 <style scoped>
+.room-notification-list {
+  padding: 20px;
+}
+
 .filter-row {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .filter-item {

@@ -96,11 +96,14 @@ export default {
   methods: {
     async fetchAccountSettings() {
       try {
-        const response = await axios.get('/api/account-settings');
+        const response = await axios.get('/api/personal-info');
         if (response.status === 200) {
-          this.accountForm = response.data;
-        } else {
-          this.$message.error('获取账号设置信息失败');
+          this.accountForm = {
+            organization: response.data.organization,
+            username: response.data.username,
+            phone: response.data.phone,
+            email: response.data.email
+          };
         }
       } catch (error) {
         console.error('获取账号设置信息失败:', error);

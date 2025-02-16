@@ -7,6 +7,16 @@ from routes.admin_role import admin_role_bp
 from routes.community_admin import community_admin_bp
 from routes.property_admin import property_admin_bp
 from routes.owner import owner_bp
+from routes.owner_application import owner_application_bp
+from routes.house_query import house_query_bp
+from routes.room_notification import room_notification_bp
+from routes.community_notification import community_notification_bp
+from routes.advertisement import advertisement_bp
+from routes.call_record import call_record_bp
+from routes.alarm_record import alarm_record_bp
+from routes.unlock_record import unlock_record_bp
+from models.personal_info import PersonalInfo
+from routes.personal_info import personal_info_bp
 
 def create_app():
     app = Flask(__name__)
@@ -23,6 +33,15 @@ def create_app():
     app.register_blueprint(community_admin_bp)
     app.register_blueprint(property_admin_bp)
     app.register_blueprint(owner_bp)
+    app.register_blueprint(owner_application_bp)
+    app.register_blueprint(house_query_bp)
+    app.register_blueprint(room_notification_bp)
+    app.register_blueprint(community_notification_bp)
+    app.register_blueprint(advertisement_bp)
+    app.register_blueprint(call_record_bp)
+    app.register_blueprint(alarm_record_bp)
+    app.register_blueprint(unlock_record_bp)
+    app.register_blueprint(personal_info_bp)
 
     # 获取用户信息的API
     @app.route('/api/user-info', methods=['GET'])
@@ -44,12 +63,18 @@ def create_app():
         username = data.get('username')
         password = data.get('password')
 
-        # 仅当用户名为 'admin' 且密码为 'password' 时登录成功
+        # 超级管理员账号
         if username == 'admin' and password == 'password':
             session['username'] = username
             return jsonify({'success': True, 'message': '登录成功'})
-        else:
-            return jsonify({'success': False, 'message': '用户名或密码错误'})
+
+        # 普通用户登录
+        user = PersonalInfo.query.filter_by(account_number=username).first()
+        if user and user.password == password:  # 直接比较密码
+            session['username'] = username
+            return jsonify({'success': True, 'message': '登录成功'})
+        
+        return jsonify({'success': False, 'message': '用户名或密码错误'})
 
     @app.route('/api/owners/export-template', methods=['GET'])
     def export_owner_template():
@@ -170,61 +195,6 @@ def create_app():
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': f'导入失败: {str(e)}'}), 500
-
-    @app.route('/api/owner-applications', methods=['GET'])
-    def get_owner_applications():
-        if 'username' not in session:
-            return jsonify({'error': '未登录'}), 401
-        
-        # Get filter parameters
-        area = request.args.get('area')
-        building = request.args.get('building')
-        name = request.args.get('name')
-        phone = request.args.get('phone')
-        
-        # TODO: Implement actual filtering logic
-        # For now return mock data
-        return jsonify({
-            'applications': [
-                {
-                    'id': 1,
-                    'name': '王五',
-                    'phone': '13800138000',
-                    'area': 'A区',
-                    'building': '1栋',
-                    'status': 'pending',
-                    'applyTime': '2024-08-01 10:00:00'
-                }
-            ],
-            'total': 1
-        })
-
-    @app.route('/api/owner-applications/qrcode', methods=['GET'])
-    def generate_qrcode():
-        if 'username' not in session:
-            return jsonify({'error': '未登录'}), 401
-        
-        application_id = request.args.get('id')
-        if not application_id:
-            return jsonify({'error': '缺少申请ID'}), 400
-        
-        # TODO: Generate actual QR code
-        # For now return mock data
-        import base64
-        from io import BytesIO
-        from PIL import Image
-        
-        # Create a simple QR code image
-        img = Image.new('RGB', (200, 200), color = (73, 109, 137))
-        
-        # Convert to bytes
-        buffered = BytesIO()
-        img.save(buffered, format="PNG")
-        img_str = base64.b64encode(buffered.getvalue()).decode()
-        
-        return jsonify({
-            'qrcode': f'data:image/png;base64,{img_str}'
-        })
 
     @app.errorhandler(500)
     def handle_500_error(error):

@@ -7,146 +7,216 @@
         <el-breadcrumb-item>呼叫记录</el-breadcrumb-item>
       </el-breadcrumb>
 
-      <el-row class="filter-row">
+      <el-row class="filter-row" :gutter="20">
+        <el-col :span="6">
+          <el-select v-model="filter.communityId" placeholder="选择社区" class="filter-item" @change="handleCommunityChange">
+            <el-option 
+              v-for="item in communityOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-col>
         <el-col :span="4">
-          <el-select v-model="filter.community" placeholder="选择社区" class="filter-item">
-            <el-option label="1545, 惠民科技" value="huimin"></el-option>
-            </el-select>
-        </el-col>
-        <el-col :span="3">
-          <el-select v-model="filter.district" placeholder="选择区" class="filter-item">
-            <el-option label="1区" value="1"></el-option>
-            <el-option label="2区" value="2"></el-option>
+          <el-select v-model="filter.district" placeholder="选择区" class="filter-item" @change="handleDistrictChange">
+            <el-option 
+              v-for="item in districtOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-col>
-        <el-col :span="3">
-          <el-select v-model="filter.building" placeholder="选择栋" class="filter-item">
-            <el-option label="1栋" value="1"></el-option>
-            <el-option label="2栋" value="2"></el-option>
+        <el-col :span="4">
+          <el-select v-model="filter.building" placeholder="选择栋" class="filter-item" @change="handleBuildingChange">
+            <el-option 
+              v-for="item in buildingOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-col>
-        <el-col :span="3">
+        <el-col :span="4">
           <el-select v-model="filter.unit" placeholder="选择单元" class="filter-item">
-            <el-option label="1单元" value="1"></el-option>
-            <el-option label="2单元" value="2"></el-option>
+            <el-option 
+              v-for="item in unitOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
+        </el-col>
+        <el-col :span="4">
+          <el-date-picker
+            v-model="filter.dateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            class="filter-item"
+          />
         </el-col>
         <el-col :span="2">
-          <el-button type="primary" @click="searchCallRecords">查询</el-button>
+          <el-button type="primary" :loading="loading" @click="searchCallRecords">查询</el-button>
         </el-col>
       </el-row>
 
-      <el-table :data="callRecordList" style="width: 100%" v-if="callRecordList.length > 0">
-        <el-table-column prop="deviceInfo" label="门禁信息"/>
-        <el-table-column prop="callTime" label="呼叫时间"/>
-        <el-table-column label="操作">
-          <template #default="scope">
-            <el-button type="text" size="small" @click="viewCallRecord(scope.row)">查看详情</el-button>
-          </template>
-        </el-table-column>
+      <el-table :data="callRecordList" style="width: 100%" v-loading="loading">
+        <el-table-column prop="doorAccessInfo" label="门禁信息"/>
+        <el-table-column prop="callStartTime" label="呼叫时间"/>
+        <el-table-column prop="callDuration" label="呼叫时长(秒)"/>
+        <el-table-column prop="houseName" label="房屋信息"/>
       </el-table>
-      <div v-else class="empty-data">暂无数据</div>
 
-      <el-pagination
+      <div class="pagination-container">
+        <el-pagination
           background
-          layout="prev, pager, next"
-          :total="isMockData ? mockTotal : total"
+          layout="total, prev, pager, next, sizes"
+          :total="total"
           :current-page="currentPage"
           :page-size="pageSize"
+          :page-sizes="[10, 20, 50, 100]"
           @current-change="handlePageChange"
-      />
+          @size-change="handleSizeChange"
+        />
+      </div>
     </el-card>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
+import axios from 'axios'
 
 export default {
   name: 'CallRecord',
   data() {
     return {
+      loading: false,
       filter: {
-        community: 'huimin', // 默认值
+        communityId: '',
         district: '',
         building: '',
         unit: '',
+        dateRange: []
       },
+      communityOptions: [],
+      districtOptions: [],
+      buildingOptions: [],
+      unitOptions: [],
       callRecordList: [],
-      mockCallRecordList: [
-        {deviceInfo: '门禁设备-1', callTime: '2024-09-01 15:00:00'},
-        {deviceInfo: '门禁设备-2', callTime: '2024-09-01 15:05:00'},
-      ],
       total: 0,
-      mockTotal: 2,
       currentPage: 1,
       pageSize: 10,
-      isMockData: false, // 标识当前是否为模拟数据
-    };
+      mockData: [
+        {
+          id: 1,
+          doorAccessInfo: '1区1栋1单元门口机',
+          callStartTime: '2024-08-08 10:15:30',
+          callDuration: 35,
+          houseName: '1区1栋1单元101'
+        },
+        {
+          id: 2,
+          doorAccessInfo: '2区1栋1单元门口机',
+          callStartTime: '2024-08-08 14:20:00',
+          callDuration: 58,
+          houseName: '2区1栋1单元102'
+        }
+      ]
+    }
   },
   methods: {
-    async fetchCallRecords() {
-      this.isMockData = false; // 重置为非模拟数据
+    async fetchCommunities() {
       try {
-        const response = await axios.get('/api/call-records', { // 替换为你的实际接口
+        const response = await axios.get('/api/communities')
+        this.communityOptions = response.data.map(item => ({
+          value: item.id,
+          label: item.communityName
+        }))
+      } catch (error) {
+        console.error('获取社区列表失败:', error)
+      }
+    },
+    async fetchCallRecords() {
+      this.loading = true
+      try {
+        const response = await axios.get('/api/call-records', {
           params: {
-            community: this.filter.community,
+            communityId: this.filter.communityId,
             district: this.filter.district,
             building: this.filter.building,
             unit: this.filter.unit,
+            startDate: this.filter.dateRange?.[0],
+            endDate: this.filter.dateRange?.[1],
             page: this.currentPage,
-            size: this.pageSize,
-          },
-        });
-        if (response.status === 200) {
-          this.callRecordList = response.data.callRecords;
-          this.total = response.data.total;
-        } else {
-          this.$message.error(`获取呼叫记录失败，状态码: ${response.status}`);
-          this.showMockData();
-        }
+            size: this.pageSize
+          }
+        })
+        this.callRecordList = response.data.records
+        this.total = response.data.total
+        this.$message.success('获取数据成功')
       } catch (error) {
-        console.error('获取呼叫记录失败:', error);
-        this.$message.error('获取呼叫记录失败，已显示示例数据。');
-        this.showMockData();
+        console.error('获取呼叫记录失败:', error)
+        this.$message.warning('获取数据库失败，已展示示例数据')
+        this.callRecordList = this.mockData
+        this.total = this.mockData.length
+      } finally {
+        this.loading = false
       }
     },
+    handleCommunityChange() {
+      this.filter.district = ''
+      this.filter.building = ''
+      this.filter.unit = ''
+      // 获取区列表
+    },
+    handleDistrictChange() {
+      this.filter.building = ''
+      this.filter.unit = ''
+      // 获取楼栋列表
+    },
+    handleBuildingChange() {
+      this.filter.unit = ''
+      // 获取单元列表
+    },
     searchCallRecords() {
-      this.currentPage = 1;
-      this.fetchCallRecords();
+      this.currentPage = 1
+      this.fetchCallRecords()
     },
     handlePageChange(page) {
-      this.currentPage = page;
-      this.fetchCallRecords();
+      this.currentPage = page
+      this.fetchCallRecords()
     },
-    viewCallRecord(row) {
-      console.log('查看呼叫记录详情:', row);
-    },
-    showMockData() {
-      this.isMockData = true;
-      this.callRecordList = this.mockCallRecordList;
-      this.total = this.mockTotal;
-    },
+    handleSizeChange(size) {
+      this.pageSize = size
+      this.currentPage = 1
+      this.fetchCallRecords()
+    }
   },
   mounted() {
-    this.fetchCallRecords();
-  },
-};
+    this.fetchCommunities()
+    this.fetchCallRecords()
+  }
+}
 </script>
 
 <style scoped>
+.call-record-list {
+  padding: 20px;
+}
+
 .filter-row {
   margin-bottom: 20px;
 }
 
 .filter-item {
-  margin-right: 10px;
-  width: 100%; /* 让筛选框宽度撑满 */
+  width: 100%;
 }
 
-.empty-data {
-  text-align: center;
-  color: #999;
-  padding: 20px 0;
+.pagination-container {
+  margin-top: 20px;
+  text-align: right;
 }
 </style>

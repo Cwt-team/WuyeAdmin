@@ -7,94 +7,93 @@
         <el-breadcrumb-item>开锁记录</el-breadcrumb-item>
       </el-breadcrumb>
 
-      <el-row class="filter-row">
+      <el-row class="filter-row" :gutter="20">
+        <el-col :span="6">
+          <el-select v-model="filter.communityId" placeholder="选择社区" class="filter-item" @change="handleCommunityChange">
+            <el-option 
+              v-for="item in communityOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-col>
         <el-col :span="4">
-          <el-select v-model="filter.community" placeholder="选择社区" class="filter-item">
-            <el-option label="1545, 惠民科技" value="huimin"></el-option>
+          <el-select v-model="filter.district" placeholder="选择区" class="filter-item" @change="handleDistrictChange">
+            <el-option 
+              v-for="item in districtOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-col>
-        <el-col :span="3">
-          <el-select v-model="filter.district" placeholder="选择区" class="filter-item">
-            <el-option label="1区" value="1"></el-option>
-            <el-option label="2区" value="2"></el-option>
+        <el-col :span="4">
+          <el-select v-model="filter.building" placeholder="选择栋" class="filter-item" @change="handleBuildingChange">
+            <el-option 
+              v-for="item in buildingOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-col>
-        <el-col :span="3">
-          <el-select v-model="filter.building" placeholder="选择楼栋" class="filter-item">
-            <el-option label="1栋" value="1"></el-option>
-            <el-option label="2栋" value="2"></el-option>
-          </el-select>
-        </el-col>
-        <el-col :span="3">
+        <el-col :span="4">
           <el-select v-model="filter.unit" placeholder="选择单元" class="filter-item">
-            <el-option label="1单元" value="1"></el-option>
-            <el-option label="2单元" value="2"></el-option>
-          </el-select>
-        </el-col>
-        <el-col :span="3">
-          <el-select v-model="filter.floor" placeholder="选择楼层" class="filter-item">
-            <el-option label="1层" value="1"></el-option>
-            <el-option label="2层" value="2"></el-option>
-          </el-select>
-        </el-col>
-        <el-col :span="3">
-          <el-select v-model="filter.room" placeholder="选择房号" class="filter-item">
-            <el-option label="0101" value="0101"></el-option>
-            <el-option label="0102" value="0102"></el-option>
+            <el-option 
+              v-for="item in unitOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-col>
         <el-col :span="4">
-          <el-select v-model="filter.device" placeholder="所有设备" class="filter-item">
-            <el-option label="门锁1" value="lock1"></el-option>
-            <el-option label="门锁2" value="lock2"></el-option>
+          <el-select v-model="filter.deviceType" placeholder="所有设备" class="filter-item">
+            <el-option label="门口机" value="Entrance Machine" />
+            <el-option label="围墙机" value="Fencing Machine" />
+            <el-option label="其他" value="Other" />
           </el-select>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="8">
           <el-date-picker
-              v-model="filter.startDate"
-              type="date"
-              placeholder="开始日期"
-              class="filter-item"
-              value-format="yyyy-MM-dd"
-              format="yyyy-MM-dd"
-          />
-        </el-col>
-        <el-col :span="4">
-          <el-date-picker
-              v-model="filter.endDate"
-              type="date"
-              placeholder="结束日期"
-              class="filter-item"
-              value-format="yyyy-MM-dd"
-              format="yyyy-MM-dd"
+            v-model="filter.dateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            class="filter-item"
           />
         </el-col>
         <el-col :span="2">
-          <el-button type="primary" @click="searchUnlockRecords">查询</el-button>
+          <el-button type="primary" :loading="loading" @click="searchUnlockRecords">查询</el-button>
         </el-col>
       </el-row>
 
-      <el-table :data="unlockRecordList" style="width: 100%" v-if="unlockRecordList.length > 0">
-        <el-table-column prop="doorLockInfo" label="门锁信息"/>
-        <el-table-column prop="unlockType" label="开锁类型"/>
-        <el-table-column prop="unlocker" label="开锁人员"/>
-        <el-table-column prop="unlockTime" label="开锁时间"/>
-        <el-table-column label="操作">
+      <el-table :data="unlockRecordList" style="width: 100%" v-loading="loading">
+        <el-table-column prop="doorInfo" label="门禁信息"/>
+        <el-table-column prop="deviceType" label="设备类型">
           <template #default="scope">
-            <el-button type="text" size="small" @click="viewUnlockRecord(scope.row)">查看详情</el-button>
+            {{ getDeviceTypeText(scope.row.deviceType) }}
           </template>
         </el-table-column>
+        <el-table-column prop="unlockingType" label="开锁类型"/>
+        <el-table-column prop="unlocker" label="开锁人员"/>
+        <el-table-column prop="unlockingTime" label="开锁时间"/>
       </el-table>
-      <div v-else class="empty-data">暂无数据</div>
 
-      <el-pagination
+      <div class="pagination-container">
+        <el-pagination
           background
-          layout="prev, pager, next"
-          :total="isMockData ? mockTotal : total"
+          layout="total, prev, pager, next, sizes"
+          :total="total"
           :current-page="currentPage"
           :page-size="pageSize"
+          :page-sizes="[10, 20, 50, 100]"
           @current-change="handlePageChange"
-      />
+          @size-change="handleSizeChange"
+        />
+      </div>
     </el-card>
   </div>
 </template>
@@ -106,59 +105,76 @@ export default {
   name: 'UnlockRecord',
   data() {
     return {
+      loading: false,
       filter: {
-        community: 'huimin',
+        communityId: '',
         district: '',
         building: '',
         unit: '',
-        floor: '',
-        room: '',
-        device: '',
-        startDate: '',
-        endDate: '',
+        deviceType: '',
+        dateRange: []
       },
+      communityOptions: [],
+      districtOptions: [],
+      buildingOptions: [],
+      unitOptions: [],
       unlockRecordList: [],
-      mockUnlockRecordList: [
-        {doorLockInfo: '门锁设备-A', unlockType: '密码开锁', unlocker: '张三', unlockTime: '2024-09-01 15:00:00'},
-        {doorLockInfo: '门锁设备-B', unlockType: '指纹开锁', unlocker: '李四', unlockTime: '2024-09-01 15:05:00'},
-      ],
       total: 0,
-      mockTotal: 2,
       currentPage: 1,
       pageSize: 10,
-      isMockData: false,
-    };
+      mockData: [
+        {
+          doorInfo: '1区1栋1单元门口机',
+          deviceType: 'Entrance Machine',
+          unlockingType: '密码开锁',
+          unlocker: '业主本人',
+          unlockingTime: '2024-08-08 15:30:00'
+        },
+        {
+          doorInfo: '小区南门围墙机',
+          deviceType: 'Fencing Machine',
+          unlockingType: '刷卡开锁',
+          unlocker: '快递员',
+          unlockingTime: '2024-08-08 16:45:10'
+        }
+      ]
+    }
   },
   methods: {
+    getDeviceTypeText(type) {
+      const types = {
+        'Entrance Machine': '门口机',
+        'Fencing Machine': '围墙机',
+        'Other': '其他'
+      }
+      return types[type] || type
+    },
     async fetchUnlockRecords() {
-      this.isMockData = false;
+      this.loading = true
       try {
-        const response = await axios.get('/api/unlock-records', { // 替换为你的实际接口
+        const response = await axios.get('/api/unlock-records', {
           params: {
-            community: this.filter.community,
+            communityId: this.filter.communityId,
             district: this.filter.district,
             building: this.filter.building,
             unit: this.filter.unit,
-            floor: this.filter.floor,
-            room: this.filter.room,
-            device: this.filter.device,
-            startDate: this.filter.startDate,
-            endDate: this.filter.endDate,
+            deviceType: this.filter.deviceType,
+            startDate: this.filter.dateRange?.[0],
+            endDate: this.filter.dateRange?.[1],
             page: this.currentPage,
-            size: this.pageSize,
-          },
-        });
-        if (response.status === 200) {
-          this.unlockRecordList = response.data.unlockRecords;
-          this.total = response.data.total;
-        } else {
-          this.$message.error(`获取开锁记录失败，状态码: ${response.status}`);
-          this.showMockData();
-        }
+            size: this.pageSize
+          }
+        })
+        this.unlockRecordList = response.data.records
+        this.total = response.data.total
+        this.$message.success('获取数据成功')
       } catch (error) {
-        console.error('获取开锁记录失败:', error);
-        this.$message.error('获取开锁记录失败，已显示示例数据。');
-        this.showMockData();
+        console.error('获取开锁记录失败:', error)
+        this.$message.warning('获取数据库失败，已展示示例数据')
+        this.unlockRecordList = this.mockData
+        this.total = this.mockData.length
+      } finally {
+        this.loading = false
       }
     },
     searchUnlockRecords() {
@@ -169,14 +185,18 @@ export default {
       this.currentPage = page;
       this.fetchUnlockRecords();
     },
-    viewUnlockRecord(row) {
-      console.log('查看开锁记录详情:', row);
-    },
-    showMockData() {
-      this.isMockData = true;
-      this.unlockRecordList = this.mockUnlockRecordList;
-      this.total = this.mockTotal;
-    },
+    // handleCommunityChange(value) {
+    //   // Implementation of handleCommunityChange method
+    // },
+    // handleDistrictChange(value) {
+    //   // Implementation of handleDistrictChange method
+    // },
+    // handleBuildingChange(value) {
+    //   // Implementation of handleBuildingChange method
+    // },
+    // handleSizeChange(size) {
+    //   // Implementation of handleSizeChange method
+    // },
   },
   mounted() {
     this.fetchUnlockRecords();
@@ -185,18 +205,20 @@ export default {
 </script>
 
 <style scoped>
+.unlock-record-list {
+  padding: 20px;
+}
+
 .filter-row {
   margin-bottom: 20px;
 }
 
 .filter-item {
-  margin-right: 10px;
   width: 100%;
 }
 
-.empty-data {
-  text-align: center;
-  color: #999;
-  padding: 20px 0;
+.pagination-container {
+  margin-top: 20px;
+  text-align: right;
 }
 </style>
