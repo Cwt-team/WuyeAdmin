@@ -26,14 +26,14 @@ class OwnerApplication(db.Model):
     def to_dict(self):
         house_info = f"{self.house.district_number or ''}区{self.house.building_number or ''}栋{self.house.unit_number or ''}单元"
         return {
-            'id': self.id,
-            'room': house_info,
-            'name': self.name,
-            'gender': self.gender,
-            'idCard': self.id_card,
-            'phone': self.phone_number,
-            'status': self.application_status,
-            'ownerType': self.owner_type,
-            'applyTime': self.application_time.strftime('%Y-%m-%d %H:%M:%S'),
-            'callbackMessage': self.callback_message
-        } 
+            'id': self.id,  # 申请ID
+            'room': house_info,  # 通过关联的房屋信息构造出的房间信息字符串，例如 "1区1栋1单元"
+            'name': self.name,  # 申请人的姓名
+            'gender': self.gender,  # 性别（M 或 F）
+            'idCard': self.id_card,  # 身份证号
+            'phone': self.phone_number,  # 手机号码
+            'status': self.application_status,  # 申请状态
+            'ownerType': self.owner_type,  # 业主类型
+            'applyTime': self.application_time.strftime('%Y-%m-%d %H:%M:%S'),  # 格式化后的申请时间
+            'callbackMessage': self.callback_message  # 如果有打回信息，返回该信息
+        }

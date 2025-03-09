@@ -17,12 +17,13 @@ class PropertyAdmin(db.Model):
     def to_dict(self):
         """转换为字典格式"""
         return {
-            'id': str(self.id),
-            'communityId': self.community_id,
-            'name': self.name,
-            'phone': self.phone_number,  # 返回时使用phone以保持前端兼容
-            'remark': self.remark or '',
+            'id': str(self.id),  # 将管理员ID转换为字符串返回
+            'communityId': self.community_id,  # 返回关联的小区ID
+            'name': self.name,  # 返回管理员姓名
+            'phone': self.phone_number,  # 返回手机号码，前端使用字段名“phone”
+            'remark': self.remark or '',  # 返回备注，若为空则返回空字符串
             'updateTime': str(int(self.updated_at.timestamp() * 1000)) if self.updated_at else '',
-            'faceImage': self.face_image or '',
-            'faceStatus': self.face_status
-        } 
+            # 将更新时间转换为时间戳（毫秒），若为空返回空字符串
+            'faceImage': self.face_image or '',  # 返回人脸图片路径，若为空则返回空字符串
+            'faceStatus': self.face_status  # 返回人脸状态（0 或 1）
+        }

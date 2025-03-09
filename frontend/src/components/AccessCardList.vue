@@ -107,6 +107,7 @@ export default {
         cardNumber: '',
         ownerName: '',
       },
+
       cardList: [],
       total: 0,
       currentPage: 1,
@@ -144,29 +145,35 @@ export default {
       ],
     };
   },
+
   computed: {},
   watch: {},
   created() {
     this.fetchCards();
   },
+
   mounted() {},
   methods: {
     formatDate,
     getRoomInfo(row) {
       return `${row.region || ''} ${row.building || ''}栋 ${row.unit || ''}单元 ${row.room || ''}`;
     },
+
     handleSelectionChange(val) {
       this.multipleSelection = val;
     },
+
     handleCurrentChange(newPage) {
       this.currentPage = newPage;
       this.fetchCards();
     },
+
     handleSizeChange(newSize) {
       this.pageSize = newSize;
       this.currentPage = 1;
       this.fetchCards();
     },
+
     async fetchCards() {
       this.loading = true;
       try {
@@ -182,6 +189,7 @@ export default {
             size: this.pageSize,
           },
         });
+
         if (response.status === 200) {
           this.cardList = response.data.items; // 根据你的后端返回数据结构调整
           this.total = response.data.total;   // 根据你的后端返回数据结构调整
@@ -199,14 +207,17 @@ export default {
         this.loading = false;
       }
     },
+
     searchCards() {
       this.currentPage = 1;
       this.fetchCards();
     },
+
     addNewCard() {
       console.log('发放新卡');
       // TODO: 实现发放新卡逻辑，可以打开一个弹窗或跳转到新页面
     },
+
     voidCard() {
       if (this.multipleSelection.length > 0) {
         const cardIds = this.multipleSelection.map(item => item.id); // 假设你的数据中有 id 字段
@@ -214,6 +225,7 @@ export default {
         // TODO: 调用后端接口作废选中的卡
       }
     },
+
     batchDeleteCards() {
       if (this.multipleSelection.length > 0) {
         const cardIds = this.multipleSelection.map(item => item.id); // 假设你的数据中有 id 字段
@@ -221,17 +233,21 @@ export default {
         // TODO: 调用后端接口删除选中的卡
       }
     },
+
     importCards() {
       console.log('导入卡');
       // TODO: 实现导入卡逻辑，可以打开一个文件选择器
     },
+
     editCard(row) {
       console.log('编辑门禁卡:', row);
       // TODO: 实现编辑门禁卡逻辑，可以打开一个弹窗或跳转到编辑页面
     },
+
     deleteCard(row) {
       console.log('删除门禁卡:', row);
       // TODO: 调用后端接口删除该卡
+
     },
   },
 };

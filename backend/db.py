@@ -8,7 +8,7 @@ db = SQLAlchemy()
 def init_db(app):
     """初始化数据库"""
     # 配置数据库
-    app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:123456@localhost:3326/wuye"
+    app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:9874123cwj@localhost:3316/wuye1"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_ECHO'] = True  # 输出SQL语句，方便调试
     

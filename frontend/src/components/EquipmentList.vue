@@ -1,13 +1,21 @@
 <template>
+<el-button type="primary" @click="sendHeartbeat">发送心跳包</el-button>
+<!-- 设备管理主容器 -->
   <div class="equipment-list">
     <el-card>
+
+    <!-- 筛选条件区域 -->
       <el-row class="filter-row" :gutter="10">
+
+ <!-- 区域选择 -->
         <el-col :span="4">
           <el-select v-model="filters.region" placeholder="区域" style="width: 100%">
             <el-option label="全部区域" value=""></el-option>
             <el-option label="某某科技园" value="某某科技园"></el-option>
           </el-select>
         </el-col>
+
+<!-- 楼栋选择 -->
         <el-col :span="4">
           <el-select v-model="filters.building" placeholder="楼栋" style="width: 100%">
             <el-option label="全部楼栋" value=""></el-option>
@@ -15,6 +23,8 @@
             <el-option label="2栋" value="2栋"></el-option>
           </el-select>
         </el-col>
+
+<!-- 单元选择 -->
         <el-col :span="4">
           <el-select v-model="filters.unit" placeholder="单元" style="width: 100%">
             <el-option label="全部单元" value=""></el-option>
@@ -22,6 +32,8 @@
             <el-option label="2单元" value="2单元"></el-option>
           </el-select>
         </el-col>
+
+<!-- 设备类型筛选 -->
         <el-col :span="4">
           <el-select v-model="filters.equipmentType" placeholder="所有类型" style="width: 100%">
             <el-option label="所有类型" value=""></el-option>
@@ -29,6 +41,8 @@
             <el-option label="室内机" value="室内机"></el-option>
           </el-select>
         </el-col>
+
+<!-- 设备状态筛选 -->
         <el-col :span="4">
           <el-select v-model="filters.equipmentStatus" placeholder="所有设备" style="width: 100%">
             <el-option label="所有设备" value=""></el-option>
@@ -37,13 +51,21 @@
           </el-select>
         </el-col>
       </el-row>
+
+<!-- 第二行筛选条件 -->
       <el-row class="filter-row" :gutter="10">
+
+<!-- 设备名称搜索 -->
         <el-col :span="4">
           <el-input v-model="filters.equipmentName" placeholder="设备名称" clearable class="filter-item" />
         </el-col>
+
+<!-- UID搜索 -->
         <el-col :span="4">
           <el-input v-model="filters.uid" placeholder="UID" clearable class="filter-item" />
         </el-col>
+
+<!-- 操作按钮组 -->
         <el-col :span="16" style="text-align: left;">
           <el-button type="primary" @click="searchEquipment">查询</el-button>
           <el-button @click="resetFilters">刷新</el-button>
@@ -52,6 +74,7 @@
         </el-col>
       </el-row>
 
+<!-- 设备数据表格 -->
       <el-table :data="equipmentListToShow" style="width: 100%">
         <el-table-column prop="equipmentName" label="设备名称" />
         <el-table-column prop="status" label="状态" :formatter="formatStatus" />
@@ -59,6 +82,8 @@
         <el-table-column prop="version" label="版本号" />
         <el-table-column prop="equipmentType" label="设备类型" />
         <el-table-column prop="updateTime" label="更新时间" width="160" />
+
+<!-- 操作列 -->
         <el-table-column label="操作" width="200">
           <template #default="scope">
             <el-button type="primary" size="small" @click="upgradeEquipment(scope.row)">升级</el-button>
@@ -69,6 +94,7 @@
         </el-table-column>
       </el-table>
 
+<!-- 分页组件 -->
       <div class="pagination-container">
         <el-pagination
           background
@@ -84,6 +110,8 @@
     </el-card>
   </div>
 </template>
+
+
 
 <script>
 import axios from 'axios';
@@ -123,6 +151,22 @@ export default {
   methods: {
     formatStatus(row) {
       return row.status === 'online' ? '在线' : '离线';
+    },
+    async sendHeartbeat() {
+      try {
+        const response = await axios.post('/api/sendHeartbeat', {
+          communityId: "123456",       // 替换为实际值
+          deviceCode: "200111",        // 替换为实际值
+          cmd: "heart",
+          softVer: "1.02.03.04",      // 替换为实际值
+          name: "阳光花园",            // 替换为实际值
+          deviceSn: "asjkdfiouasdjk123" // 替换为实际值
+        });
+        this.$message.success(response.data.message);
+      } catch (error) {
+        console.error('发送心跳包失败:', error);
+        this.$message.error('发送心跳包失败');
+      }
     },
     async fetchEquipment() {
       this.loading = true;

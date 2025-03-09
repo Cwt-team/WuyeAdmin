@@ -1,8 +1,8 @@
 -- 创建数据库
-CREATE DATABASE IF NOT EXISTS Wuye DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+CREATE DATABASE IF NOT EXISTS wuye DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- 使用数据库
-USE Wuye;
+USE wuye;
 
 -- 创建小区信息表
 CREATE TABLE community_info (

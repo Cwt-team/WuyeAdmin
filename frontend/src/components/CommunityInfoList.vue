@@ -1,7 +1,10 @@
 <template>
+<!-- 小区信息管理主容器 -->
   <div class="community-info-list">
     <el-card>
+    <!-- 搜索区域 -->
       <el-row :gutter="20" class="mb-4">
+      <!-- 关键字搜索 -->
         <el-col :span="6">
           <el-input
             v-model="search.keyword"
@@ -9,6 +12,8 @@
             clearable
           />
         </el-col>
+
+         <!-- 城市搜索 -->
         <el-col :span="6">
           <el-input
             v-model="search.location"
@@ -16,38 +21,44 @@
             clearable
           />
         </el-col>
+
+        <!-- 操作按钮 -->
         <el-col :span="12">
           <el-button type="primary" @click="searchCommunity">查询</el-button>
           <el-button type="success" @click="addCommunity">添加小区</el-button>
         </el-col>
       </el-row>
 
+      <!-- 小区信息表格 -->
       <el-table :data="communityList" style="width: 100%" v-loading="loading">
         <el-table-column prop="code" label="小区编号" />
         <el-table-column prop="name" label="小区名称" />
         <el-table-column prop="location" label="所在城市" />
         <el-table-column prop="createTime" label="创建时间" />
+
+        <!-- 操作列 -->
         <el-table-column label="操作" width="250">
           <template #default="scope">
-            <el-button 
-              type="primary" 
-              size="small" 
+            <el-button
+              type="primary"
+              size="small"
               @click="handleEdit(scope.row)"
             >编辑</el-button>
-            <el-button 
-              type="primary" 
-              size="small" 
+            <el-button
+              type="primary"
+              size="small"
               @click="showConfig(scope.row)"
             >配置</el-button>
-            <el-button 
-              type="danger" 
-              size="small" 
+            <el-button
+              type="danger"
+              size="small"
               @click="deleteCommunity(scope.row)"
             >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
 
+      <!-- 分页组件 -->
       <el-pagination
         background
         layout="sizes, prev, pager, next"
@@ -60,13 +71,14 @@
       />
 
       <!-- 配置弹窗 -->
-      <el-dialog 
-        :title="dialogTitle" 
-        v-model="showConfigDialog" 
+      <el-dialog
+        :title="dialogTitle"
+        v-model="showConfigDialog"
         width="500px"
       >
-        <el-form 
-          :model="configForm" 
+       <!-- 配置表单 -->
+        <el-form
+          :model="configForm"
           label-width="140px"
           :rules="configRules"
           ref="configFormRef"
@@ -112,13 +124,13 @@
       </el-dialog>
 
       <!-- 添加新的编辑/添加对话框 -->
-      <el-dialog 
-        :title="editDialogTitle" 
-        v-model="showEditDialog" 
+      <el-dialog
+        :title="editDialogTitle"
+        v-model="showEditDialog"
         width="500px"
       >
-        <el-form 
-          :model="editForm" 
+        <el-form
+          :model="editForm"
           label-width="100px"
           :rules="editRules"
           ref="editFormRef"
@@ -215,7 +227,7 @@ export default {
             size: this.pageSize
           }
         })
-        
+
         if (response.data) {
           this.communityList = response.data.items
           this.total = response.data.total
@@ -258,7 +270,7 @@ export default {
         await this.$confirm('确认删除该小区吗？', '提示', {
           type: 'warning'
         })
-        
+
         const response = await axios.delete(`/api/communities/${row.id}`)
         if (response.data.success) {
           this.$message.success('删除成功')
@@ -276,7 +288,7 @@ export default {
       try {
         const formRef = this.$refs.configFormRef
         await formRef.validate()
-        
+
         if (this.configForm.id) {
           // 编辑
           const response = await axios.put(`/api/communities/${this.configForm.id}`, this.configForm)
@@ -290,7 +302,7 @@ export default {
             this.$message.success('添加成功')
           }
         }
-        
+
         this.showConfigDialog = false
         this.fetchCommunities()
       } catch (error) {
@@ -338,7 +350,7 @@ export default {
       try {
         const formRef = this.$refs.editFormRef
         await formRef.validate()
-        
+
         if (this.editForm.id) {
           // 编辑
           const response = await axios.put(`/api/communities/${this.editForm.id}`, {
@@ -358,7 +370,7 @@ export default {
             this.$message.success('添加成功')
           }
         }
-        
+
         this.showEditDialog = false
         this.fetchCommunities()
       } catch (error) {

@@ -15,13 +15,17 @@ class RoomNotification(db.Model):
     updated_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now, onupdate=datetime.now)
 
     def to_dict(self):
+        # 将当前 RoomNotification 对象转换为字典格式，便于序列化（例如转换为 JSON 数据返回给前端）
         return {
-            'id': self.id,
-            'communityId': self.community_id,
-            'houseId': self.house_id,
-            'title': self.title,
-            'content': self.content,
+            'id': self.id,  # 返回通知的唯一标识 id
+            'communityId': self.community_id,  # 返回所属社区的 ID
+            'houseId': self.house_id,  # 返回关联房屋的 ID（如果有）
+            'title': self.title,  # 返回通知标题
+            'content': self.content,  # 返回通知内容
+            # 如果 display_start_time 不为空，则使用 strftime 格式化为 'YYYY-MM-DD' 字符串；否则返回 None
             'displayStartTime': self.display_start_time.strftime('%Y-%m-%d') if self.display_start_time else None,
+            # 如果 display_end_time 不为空，则使用 strftime 格式化为 'YYYY-MM-DD' 字符串；否则返回 None
             'displayEndTime': self.display_end_time.strftime('%Y-%m-%d') if self.display_end_time else None,
+            # 将 created_at 字段格式化为 'YYYY-MM-DD HH:MM:SS' 格式的字符串返回
             'createdAt': self.created_at.strftime('%Y-%m-%d %H:%M:%S')
-        } 
+        }

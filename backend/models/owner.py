@@ -27,21 +27,21 @@ class OwnerInfo(db.Model):
 
     def to_dict(self):
         return {
-            'id': str(self.id),
-            'communityId': self.community_id,
-            'houseId': self.house_id,
-            'houseName': self.house.house_full_name if self.house else '',
-            'name': self.name,
-            'gender': self.gender,
-            'phone': self.phone_number,
-            'idCard': self.id_card or '',
-            'email': self.email or '',
-            'city': self.city or '',
-            'address': self.address or '',
-            'ownerType': self.owner_type,
-            'faceImage': self.face_image or '',
-            'faceStatus': self.face_status,
-            'updateTime': self.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+            'id': str(self.id),  # 将 id 转为字符串返回
+            'communityId': self.community_id,  # 返回所属社区的 ID
+            'houseId': self.house_id,  # 返回所属房屋的 ID
+            'houseName': self.house.house_full_name if self.house else '',  # 如果关联的房屋存在，则返回房屋的完整名称，否则返回空字符串
+            'name': self.name,  # 返回业主姓名
+            'gender': self.gender,  # 返回业主性别
+            'phone': self.phone_number,  # 返回手机号码
+            'idCard': self.id_card or '',  # 返回身份证号码，若为空则返回空字符串
+            'email': self.email or '',  # 返回邮箱，若为空则返回空字符串
+            'city': self.city or '',  # 返回户籍城市，若为空则返回空字符串
+            'address': self.address or '',  # 返回详细地址，若为空则返回空字符串
+            'ownerType': self.owner_type,  # 返回业主类型
+            'faceImage': self.face_image or '',  # 返回人脸图片路径，若为空则返回空字符串
+            'faceStatus': self.face_status,  # 返回人脸状态（0或1）
+            'updateTime': self.updated_at.strftime('%Y-%m-%d %H:%M:%S')  # 格式化返回更新时间
         }
 
 class OwnerPermission(db.Model):
@@ -59,12 +59,12 @@ class OwnerPermission(db.Model):
 
     def to_dict(self):
         return {
-            'id': str(self.id),
-            'ownerId': str(self.owner_id),
-            'houseId': self.house_id,
-            'status': self.permission_status,
-            'validPeriod': self.valid_period,
-            'callingEnabled': self.calling_enabled,
-            'pstnEnabled': self.pstn_enabled,
-            'updateTime': self.updated_at.strftime('%Y-%m-%d %H:%M:%S')
-        } 
+            'id': str(self.id),                    # 将权限记录的ID转换为字符串返回
+            'ownerId': str(self.owner_id),           # 将业主ID转换为字符串返回
+            'houseId': self.house_id,                # 返回关联的房屋ID
+            'status': self.permission_status,        # 返回权限状态
+            'validPeriod': self.valid_period,        # 返回权限有效期
+            'callingEnabled': self.calling_enabled,  # 返回呼叫功能是否启用的状态
+            'pstnEnabled': self.pstn_enabled,        # 返回手机转接功能是否启用的状态
+            'updateTime': self.updated_at.strftime('%Y-%m-%d %H:%M:%S')  # 格式化返回更新时间
+        }
