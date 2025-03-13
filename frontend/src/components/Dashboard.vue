@@ -148,6 +148,16 @@ export default {
         },
         {
           id: 8,
+          name: '区域维护管理',
+          icon: 'el-icon-s-management',
+          children: [
+            { id: 1, name: '报事报修', component: 'AreaMaintenance', params: { tab: 'maintenance' } },
+            { id: 2, name: '社区评价', component: 'AreaMaintenance', params: { tab: 'reviews' } },
+            { id: 3, name: '投诉建议', component: 'AreaMaintenance', params: { tab: 'complaints' } }
+          ]
+        },
+        {
+          id: 9,
           name: '个人信息中心',
           icon: 'el-icon-user',
           children: [
@@ -174,27 +184,41 @@ export default {
 
       const [parentId, childId] = index.split('-').map(Number);
       const selectedItem = this.menuItems.find(item => item.id === parentId);
-
+      
       if (selectedItem && selectedItem.children) {
-        const selectedSubItem = selectedItem.children.find(child => child.id === childId);
-        if (selectedSubItem) {
-          try {
-            const module = await import(`@/components/${selectedSubItem.component}.vue`);
-            this.currentComponent = module.default;
-          } catch (error) {
-            console.error('加载组件失败:', error);
-            this.currentComponent = null;
+        const selectedChild = selectedItem.children.find(child => child.id === childId);
+        if (selectedChild) {
+          console.log('加载组件:', selectedChild.component);
+          
+          // 处理 AreaMaintenance 组件的特殊情况
+          if (selectedChild.component === 'AreaMaintenance' && selectedChild.params) {
+            // 动态导入组件
+            const componentModule = await import(`@/views/${selectedChild.component}.vue`);
+            const component = componentModule.default;
+            
+            // 创建带有参数的组件
+            this.currentComponent = {
+              render: h => h(component, { props: selectedChild.params })
+            };
+          } else {
+            // 普通组件加载
+            this.currentComponent = () => import(`@/components/${selectedChild.component}.vue`);
           }
+          
+          // 更新面包屑
+          this.breadcrumb = [
+            { name: selectedItem.name, path: '#' },
+            { name: selectedChild.name, path: '#' }
+          ];
         }
       } else if (selectedItem) {
-        // 如果没有子菜单，只加载父菜单的组件
-        try {
-          const module = await import(`@/components/${selectedItem.component}.vue`);
-          this.currentComponent = module.default;
-        } catch (error) {
-          console.error('加载组件失败:', error);
-          this.currentComponent = null;
-        }
+        console.log('加载父级组件:', selectedItem.component);
+        this.currentComponent = () => import(`@/components/${selectedItem.component}.vue`);
+        
+        // 更新面包屑
+        this.breadcrumb = [
+          { name: selectedItem.name, path: '#' }
+        ];
       }
     },
     async fetchUserInfo() {

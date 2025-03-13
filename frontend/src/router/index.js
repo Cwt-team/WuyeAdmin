@@ -8,9 +8,9 @@ const routes = [
   { path: '/login', name: 'UserLogin', component: UserLogin },
   { path: '/dashboard', name: 'DashboardView', component: DashboardView, meta: { requiresAuth: true } },
   { path: '/houses/:id', name: 'HouseDetail', component: HouseDetail, meta: { requiresAuth: true } },
-  { 
-    path: '/property-admins', 
-    name: 'PropertyAdminList', 
+  {
+    path: '/property-admins',
+    name: 'PropertyAdminList',
     component: () => import('../components/PropertyAdminList.vue'),
     meta: { requiresAuth: true }
   }
