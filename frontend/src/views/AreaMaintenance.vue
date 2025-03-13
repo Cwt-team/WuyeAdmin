@@ -1,7 +1,10 @@
 <template>
   <div class="area-maintenance-container">
+    <div class="breadcrumb">
+      <span>首页</span> / <span>区域维护管理</span> / <span>{{ getBreadcrumbTitle() }}</span>
+    </div>
     <h1>区域维护管理</h1>
-    <el-tabs v-model="activeTab" type="card">
+    <el-tabs v-model="currentTab" type="card">
       <el-tab-pane label="报事报修" name="maintenance">
         <MaintenanceRequests />
       </el-tab-pane>
@@ -21,14 +24,36 @@ import CommunityReviews from '@/components/CommunityReviews.vue'
 import ComplaintSuggestions from '@/components/ComplaintSuggestions.vue'
 
 export default {
+  name: 'AreaMaintenanceView',
   components: {
     MaintenanceRequests,
     CommunityReviews,
     ComplaintSuggestions
   },
+  props: {
+    activeTab: {
+      type: String,
+      default: 'maintenance'
+    }
+  },
   data() {
     return {
-      activeTab: 'maintenance'
+      currentTab: this.activeTab
+    }
+  },
+  watch: {
+    activeTab(newVal) {
+      this.currentTab = newVal;
+    }
+  },
+  methods: {
+    getBreadcrumbTitle() {
+      const tabTitles = {
+        maintenance: '报事报修',
+        reviews: '社区评价',
+        complaints: '投诉建议'
+      };
+      return tabTitles[this.currentTab] || '报事报修';
     }
   }
 }
@@ -40,6 +65,12 @@ export default {
   background-color: #fff;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.breadcrumb {
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #606266;
 }
 
 h1 {

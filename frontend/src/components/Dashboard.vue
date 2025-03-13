@@ -51,7 +51,7 @@
         </el-menu>
       </nav>
       <main>
-        <component v-if="currentComponent" :is="currentComponent"></component>
+        <component v-if="currentComponent" :is="currentComponent" :activeTab="activeTab"></component>
       </main>
     </div>
     <footer>
@@ -62,8 +62,13 @@
 
 <script>
 import axios from 'axios';
+import { defineAsyncComponent } from 'vue';
 import { ElMenu, ElSubMenu, ElMenuItem, ElButton } from 'element-plus';
 import { ArrowDown, Setting, SwitchButton } from '@element-plus/icons-vue';
+import AreaMaintenance from '@/views/AreaMaintenance.vue';
+import MaintenanceReport from '@/components/MaintenanceReport.vue';
+import CommunityReviewPage from '@/components/CommunityReviewPage.vue';
+import ComplaintSuggestionPage from '@/components/ComplaintSuggestionPage.vue';
 
 export default {
   name: 'DashboardView',
@@ -75,12 +80,17 @@ export default {
     ArrowDown,
     Setting,
     SwitchButton,
+    AreaMaintenance,
+    MaintenanceReport,
+    CommunityReviewPage,
+    ComplaintSuggestionPage
   },
   data() {
     return {
       username: 'admin', // 示例用户名
       userAvatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
       breadcrumb: [],
+      activeTab: 'maintenance', // 默认活动标签
       menuItems: [
         {
           id: 1,
@@ -124,8 +134,7 @@ export default {
           name: '公告信息管理',
           icon: 'el-icon-bell',
           children: [
-            { id: 1, name: '房间通知', component: 'RoomNotification' },
-            { id: 2, name: '小区通知', component: 'CommunityNotice' },
+            { id: 1, name: '公告列表', component: 'AnnouncementList' },
           ],
         },
         {
@@ -151,9 +160,9 @@ export default {
           name: '区域维护管理',
           icon: 'el-icon-s-management',
           children: [
-            { id: 1, name: '报事报修', component: 'AreaMaintenance', params: { tab: 'maintenance' } },
-            { id: 2, name: '社区评价', component: 'AreaMaintenance', params: { tab: 'reviews' } },
-            { id: 3, name: '投诉建议', component: 'AreaMaintenance', params: { tab: 'complaints' } }
+            { id: 1, name: '报事报修', component: 'MaintenanceReport' },
+            { id: 2, name: '社区评价', component: 'CommunityReviewPage' },
+            { id: 3, name: '投诉建议', component: 'ComplaintSuggestionPage' }
           ]
         },
         {
@@ -190,34 +199,37 @@ export default {
         if (selectedChild) {
           console.log('加载组件:', selectedChild.component);
           
-          // 处理 AreaMaintenance 组件的特殊情况
-          if (selectedChild.component === 'AreaMaintenance' && selectedChild.params) {
-            // 动态导入组件
-            const componentModule = await import(`@/views/${selectedChild.component}.vue`);
-            const component = componentModule.default;
-            
-            // 创建带有参数的组件
-            this.currentComponent = {
-              render: h => h(component, { props: selectedChild.params })
-            };
-          } else {
-            // 普通组件加载
-            this.currentComponent = () => import(`@/components/${selectedChild.component}.vue`);
-          }
-          
           // 更新面包屑
           this.breadcrumb = [
-            { name: selectedItem.name, path: '#' },
-            { name: selectedChild.name, path: '#' }
+            selectedItem.name,
+            selectedChild.name
           ];
+          
+          // 处理区域维护管理组件的特殊情况
+          if (selectedChild.component === 'AreaMaintenance') {
+            this.activeTab = selectedChild.tabName;
+            this.currentComponent = AreaMaintenance;
+          } else {
+            // 普通组件加载
+            try {
+              this.currentComponent = defineAsyncComponent(() => 
+                import(`@/components/${selectedChild.component}.vue`)
+              );
+            } catch (error) {
+              console.error('加载组件失败:', error);
+              this.currentComponent = null;
+            }
+          }
         }
       } else if (selectedItem) {
         console.log('加载父级组件:', selectedItem.component);
-        this.currentComponent = () => import(`@/components/${selectedItem.component}.vue`);
+        this.currentComponent = defineAsyncComponent(() => 
+          import(`@/components/${selectedItem.component}.vue`)
+        );
         
         // 更新面包屑
         this.breadcrumb = [
-          { name: selectedItem.name, path: '#' }
+          selectedItem.name
         ];
       }
     },
