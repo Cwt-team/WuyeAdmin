@@ -68,7 +68,7 @@ def get_maintenance_list():
 @maintenance_bp.route('/api/maintenance/communities', methods=['GET'])
 def get_communities():
     try:
-        # 简化查询，只获取基本字段
+        # 查询社区信息
         sql = text("""
             SELECT 
                 id,
@@ -88,7 +88,7 @@ def get_communities():
         
         return jsonify([{
             'id': row.id,
-            'community_name': row.community_name
+            'community_name': row.community_name  # 确保返回社区名称
         } for row in communities])
         
     except Exception as e:
@@ -102,22 +102,56 @@ def get_communities():
 @maintenance_bp.route('/api/maintenance/buildings/<int:community_id>', methods=['GET'])
 def get_buildings(community_id):
     try:
-        sql = """
-            SELECT DISTINCT id, building_number, house_full_name
-            FROM house_info
-            WHERE community_id = :community_id
-            AND house_level = 2
-            AND is_deleted = 0
-            ORDER BY CAST(building_number AS SIGNED)
-        """
-        buildings = db.session.execute(sql, {'community_id': community_id}).fetchall()
-        return jsonify([{
-            'id': b.id,
-            'building_number': b.building_number,
-            'house_full_name': b.house_full_name
-        } for b in buildings])
+        # 添加调试日志
+        print(f"正在查询社区ID: {community_id} 的楼栋数据")
+        
+        # 检查社区是否存在
+        community = db.session.query(CommunityInfo).filter_by(id=community_id).first()
+        if not community:
+            print(f"社区ID {community_id} 不存在")
+            return jsonify({'error': '社区不存在'}), 404
+            
+        # 主查询
+        sql = text("""
+            SELECT DISTINCT 
+                h.id,
+                h.building_number,
+                h.house_full_name,
+                h.district_number
+            FROM house_info h
+            WHERE h.community_id = :community_id
+            AND h.house_level = 2
+            AND h.building_number IS NOT NULL
+            ORDER BY 
+                CAST(h.district_number AS SIGNED),
+                CAST(h.building_number AS SIGNED)
+        """)
+        
+        try:
+            result = db.session.execute(sql, {
+                'community_id': community_id
+            })
+            buildings = result.fetchall()
+            
+            # 打印调试信息
+            print(f"查询到 {len(buildings)} 条楼栋数据")
+            for building in buildings:
+                print(f"楼栋信息: ID={building.id}, 区号={building.district_number}, "
+                      f"栋号={building.building_number}, 名称={building.house_full_name}")
+            
+            return jsonify([{
+                'id': row.id,
+                'building_number': row.building_number,
+                'house_full_name': row.house_full_name,
+                'district_number': row.district_number
+            } for row in buildings])
+            
+        except Exception as e:
+            print(f"执行主查询时出错: {str(e)}")
+            return jsonify({'error': '数据库查询失败'}), 500
+            
     except Exception as e:
-        logging.error(f"获取楼栋列表失败: {str(e)}")
+        print(f"获取楼栋列表失败: {str(e)}")
         return jsonify({'error': '获取楼栋列表失败'}), 500
 
 # 获取房间列表

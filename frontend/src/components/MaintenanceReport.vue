@@ -3,12 +3,18 @@
     <!-- 搜索表单 -->
     <el-form :inline="true" class="search-form">
       <el-form-item label="社区">
-        <el-select v-model="filters.community" placeholder="请选择社区" clearable @change="handleCommunityChange">
+        <el-select 
+          v-model="filters.community" 
+          placeholder="请选择社区" 
+          clearable 
+          @change="handleCommunityChange"
+          class="large-select"
+        >
           <el-option
             v-for="item in communities"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
+            :key="item.id"
+            :label="item.community_name"
+            :value="item.id"
           />
         </el-select>
       </el-form-item>
@@ -21,6 +27,7 @@
           clearable
           :disabled="!filters.community"
           @change="handleBuildingChange"
+          class="large-select"
         >
           <el-option
             v-for="item in buildingOptions"
@@ -38,18 +45,24 @@
           placeholder="请选择房间号" 
           clearable
           :disabled="!filters.building"
+          class="large-select"
         >
           <el-option
             v-for="item in roomOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
+            :key="item.room_number"
+            :label="item.house_full_name"
+            :value="item.room_number"
           />
         </el-select>
       </el-form-item>
       
       <el-form-item label="状态">
-        <el-select v-model="filters.status" placeholder="请选择状态" clearable>
+        <el-select 
+          v-model="filters.status" 
+          placeholder="请选择状态" 
+          clearable
+          class="large-select"
+        >
           <el-option
             v-for="item in statusOptions"
             :key="item.value"
@@ -277,8 +290,8 @@ export default {
         }
 
         this.communities = response.data.map(item => ({
-          value: item.id,
-          label: item.community_name,
+          id: item.id,
+          community_name: item.community_name,
           address: item.address
         }));
 
@@ -437,12 +450,16 @@ export default {
     },
 
     // 监听社区选择变化
-    handleCommunityChange(value) {
-      this.filters.building = '';
-      this.filters.roomNumber = '';
-      if (value) {
-        this.fetchBuildings(value);
+    async handleCommunityChange(communityId) {
+      if (!communityId) {
+        this.buildingOptions = [];
+        this.filters.building = '';
+        this.filters.roomNumber = '';
+        return;
       }
+      
+      console.log('社区变更，ID:', communityId); // 添加日志
+      await this.fetchBuildings(communityId);
     },
 
     // 监听楼栋选择变化
@@ -458,12 +475,19 @@ export default {
     // 获取楼栋列表
     async fetchBuildings(communityId) {
       try {
+        console.log('正在获取楼栋数据，社区ID:', communityId);
         const response = await axios.get(`/api/maintenance/buildings/${communityId}`);
+        console.log('获取到的楼栋数据:', response.data);
+        
         this.buildingOptions = response.data.map(item => ({
-          value: item.building_number,  // 使用 building_number 作为值
-          label: item.house_full_name,  // 使用完整名称作为显示
-          id: item.id                   // 保存 id 用于后续查询
+          value: item.building_number,
+          label: item.house_full_name
         }));
+        
+        // 如果只有一个楼栋，自动选择
+        if (this.buildingOptions.length === 1) {
+          this.filters.building = this.buildingOptions[0].value;
+        }
       } catch (error) {
         console.error('获取楼栋列表失败:', error);
         this.$message.error('获取楼栋列表失败');
@@ -548,5 +572,9 @@ export default {
   margin: 5px;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.large-select {
+  width: 200px;
 }
 </style>

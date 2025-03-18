@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
 from models import DistrictInfo, BuildingInfo, UnitInfo, CommunityInfo
 import logging
+from sqlalchemy import text
+from flask_sqlalchemy import SQLAlchemy
 
 # 配置日志
 logging.basicConfig(level=logging.DEBUG)
@@ -60,34 +62,36 @@ def get_buildings():
         if not community_id or not district_number:
             return jsonify([]), 200
             
-        # 根据区域编号查询区域ID
-        district = DistrictInfo.query.filter_by(
-            community_id=community_id,
-            district_number=district_number,
-            status=1
-        ).first()
+        # 直接从house_info表查询楼栋数据
+        sql = text("""
+            SELECT 
+                h.id,
+                h.building_number as number,
+                h.house_full_name as name
+            FROM house_info h
+            WHERE h.community_id = :community_id
+            AND h.district_number = :district_number
+            AND h.house_level = 2
+            ORDER BY CAST(h.building_number AS SIGNED)
+        """)
         
-        if not district:
-            logger.warning(f"未找到区域，社区ID: {community_id}，区域编号: {district_number}")
-            return jsonify([]), 200
-            
-        buildings = BuildingInfo.query.filter_by(
-            community_id=community_id,
-            district_id=district.id,
-            status=1
-        ).all()
+        result = db.session.execute(sql, {
+            'community_id': community_id,
+            'district_number': district_number
+        })
         
-        result = [
+        buildings = [
             {
-                'id': b.id, 
-                'name': b.building_name,
-                'number': b.building_number
-            } 
-            for b in buildings
+                'id': row.id,
+                'name': row.name,
+                'number': row.number
+            }
+            for row in result
         ]
         
-        logger.debug(f"获取到{len(result)}个楼栋")
-        return jsonify(result)
+        logger.debug(f"获取到{len(buildings)}个楼栋")
+        return jsonify(buildings)
+        
     except Exception as e:
         logger.error(f"获取楼栋列表失败: {str(e)}")
         return jsonify([]), 200
