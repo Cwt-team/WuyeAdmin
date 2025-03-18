@@ -17,6 +17,15 @@ from routes.alarm_record import alarm_record_bp
 from routes.unlock_record import unlock_record_bp
 from models.personal_info import PersonalInfo
 from routes.personal_info import personal_info_bp
+from routes.maintenance import maintenance_bp
+import logging
+
+# 配置日志
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 def create_app():
     app = Flask(__name__)
@@ -25,6 +34,11 @@ def create_app():
 
     # 初始化数据库
     init_db(app)
+
+    # 注册蓝图前记录日志
+    logger.info("正在注册维修模块蓝图")
+    app.register_blueprint(maintenance_bp)
+    logger.info("维修模块蓝图注册完成")
 
     # 注册蓝图
     app.register_blueprint(community_bp)
@@ -42,6 +56,16 @@ def create_app():
     app.register_blueprint(alarm_record_bp)
     app.register_blueprint(unlock_record_bp)
     app.register_blueprint(personal_info_bp)
+
+    @app.before_request
+    def log_request_info():
+        logger.debug('Headers: %s', request.headers)
+        logger.debug('Body: %s', request.get_data())
+
+    @app.after_request
+    def log_response_info(response):
+        logger.debug('Response: %s', response.get_data())
+        return response
 
     # 获取用户信息的API
     @app.route('/api/user-info', methods=['GET'])
@@ -207,4 +231,5 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
+    logger.info("Flask应用启动")
     app.run(debug=True)
