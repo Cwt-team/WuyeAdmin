@@ -571,7 +571,7 @@ export default {
     // 获取房间号列表
     async fetchRooms() {
       try {
-        if (!this.filters.community || !this.filters.building || !this.selectedDistrict) {
+        if (!this.filters.community || !this.filters.building || !this.filters.unit || !this.selectedDistrict) {
           return;
         }
         
@@ -580,7 +580,8 @@ export default {
           params: {
             communityId: this.filters.community,
             buildingNumber: this.filters.building,
-            districtNumber: this.selectedDistrict
+            districtNumber: this.selectedDistrict,
+            unitNumber: this.filters.unit
           }
         });
         

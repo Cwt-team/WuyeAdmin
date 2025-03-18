@@ -21,6 +21,9 @@ class HouseInfo(db.Model):
     # 定义单元编号字段，类型为字符串，最大长度 10
     unit_number = db.Column(db.String(10))
 
+    # 定义房间号字段，类型为字符串，最大长度 10
+    room_number = db.Column(db.String(10))
+
     # 定义完整房屋名称字段，类型为字符串，最大长度 100，不能为空
     house_full_name = db.Column(db.String(100), nullable=False)
 
@@ -50,6 +53,7 @@ class HouseInfo(db.Model):
             'districtNumber': self.district_number,  # 区号
             'buildingNumber': self.building_number,  # 楼栋号
             'unitNumber': self.unit_number,  # 单元号
+            'roomNumber': self.room_number,  # 房间号
             'fullName': self.house_full_name,  # 房屋的完整名称
             'level': self.house_level,  # 房屋层级（例如区、栋、单元）
             'parentId': self.parent_id,  # 父级房屋的 ID

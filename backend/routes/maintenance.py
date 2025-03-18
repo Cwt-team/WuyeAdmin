@@ -161,102 +161,70 @@ def get_rooms():
         community_id = request.args.get('communityId', type=int)
         building_number = request.args.get('buildingNumber')
         district_number = request.args.get('districtNumber')
+        unit_number = request.args.get('unitNumber')
         
-        print(f"正在查询房间号，社区ID: {community_id}, 区号: {district_number}, 楼栋号: {building_number}")
+        print("\n=== 开始查询房间号 ===")
+        print(f"请求参数:")
+        print(f"- 社区ID: {community_id}, 类型: {type(community_id)}")
+        print(f"- 区号: {district_number}, 类型: {type(district_number)}")
+        print(f"- 楼栋号: {building_number}, 类型: {type(building_number)}")
+        print(f"- 单元号: {unit_number}, 类型: {type(unit_number)}")
         
-        if not all([community_id, building_number]):
+        if not all([community_id, building_number, district_number, unit_number]):
+            print("参数验证失败，缺少必要参数")
             return jsonify([])
             
-        # 先检查数据是否存在
-        check_sql = text("""
-            SELECT COUNT(*) as count
-            FROM house_info h
-            WHERE h.community_id = :community_id
-            AND h.building_number = :building_number
-            AND h.district_number = :district_number
-        """)
-        
-        count_result = db.session.execute(check_sql, {
-            'community_id': community_id,
-            'building_number': building_number,
-            'district_number': district_number
-        }).scalar()
-        
-        print(f"找到 {count_result} 条房屋数据")
-        
-        # 主查询
+        # 修改查询语句
         sql = text("""
             SELECT DISTINCT
                 h.id,
                 h.room_number,
                 h.unit_number,
-                h.house_full_name,
-                h.house_level
+                h.house_full_name
             FROM house_info h
             WHERE h.community_id = :community_id
-            AND h.building_number = :building_number
             AND h.district_number = :district_number
-            AND h.house_level = 3
-            ORDER BY 
-                CAST(h.unit_number AS SIGNED),
-                CAST(h.room_number AS SIGNED)
+            AND h.building_number = :building_number
+            AND h.unit_number = :unit_number
+            AND h.house_level = 4
+            ORDER BY CAST(SUBSTRING(h.room_number, 1, 2) AS SIGNED),
+                     CAST(SUBSTRING(h.room_number, 3, 2) AS SIGNED)
         """)
         
-        result = db.session.execute(sql, {
+        print("\n=== 执行SQL查询 ===")
+        params = {
             'community_id': community_id,
+            'district_number': district_number,
             'building_number': building_number,
-            'district_number': district_number
-        })
+            'unit_number': unit_number
+        }
+        print(f"查询参数: {params}")
         
+        result = db.session.execute(sql, params)
         rooms = result.fetchall()
-        print(f"查询到 {len(rooms)} 个房间")
         
-        if not rooms:
-            # 检查是否存在单元数据
-            unit_sql = text("""
-                SELECT DISTINCT
-                    h.id,
-                    h.unit_number,
-                    h.house_full_name
-                FROM house_info h
-                WHERE h.community_id = :community_id
-                AND h.building_number = :building_number
-                AND h.district_number = :district_number
-                AND h.house_level = 3
-            """)
-            
-            unit_result = db.session.execute(unit_sql, {
-                'community_id': community_id,
-                'building_number': building_number,
-                'district_number': district_number
-            })
-            
-            units = unit_result.fetchall()
-            print(f"查询到 {len(units)} 个单元")
-            
-            if units:
-                # 如果有单元数据，为每个单元生成房间
-                rooms = []
-                for unit in units:
-                    for floor in range(1, 19):  # 假设18层
-                        for room in range(1, 3):  # 假设每层2户
-                            room_number = f"{floor:02d}{room:02d}"
-                            rooms.append({
-                                'id': None,
-                                'room_number': room_number,
-                                'unit_number': unit.unit_number,
-                                'house_full_name': f"{unit.house_full_name}{room_number}室"
-                            })
+        print(f"\n=== 查询结果 ===")
+        print(f"总共查询到 {len(rooms)} 个房间")
+        
+        if rooms:
+            print("第一个房间信息:")
+            print(f"- ID: {rooms[0].id}")
+            print(f"- 房间号: {rooms[0].room_number}")
+            print(f"- 单元号: {rooms[0].unit_number}")
+            print(f"- 房间名: {rooms[0].house_full_name}")
         
         return jsonify([{
-            'id': row.id if hasattr(row, 'id') else None,
-            'room_number': row.room_number if hasattr(row, 'room_number') else row['room_number'],
-            'unit_number': row.unit_number if hasattr(row, 'unit_number') else row['unit_number'],
-            'house_full_name': row.house_full_name if hasattr(row, 'house_full_name') else row['house_full_name']
+            'id': row.id,
+            'room_number': row.room_number,
+            'unit_number': row.unit_number,
+            'house_full_name': row.house_full_name
         } for row in rooms])
         
     except Exception as e:
-        print(f"获取房间号列表失败: {str(e)}")
+        print("\n=== 查询出错 ===")
+        print(f"错误类型: {type(e).__name__}")
+        print(f"错误信息: {str(e)}")
+        db.session.rollback()
         return jsonify({'error': '获取房间号列表失败'}), 500
 
 # 获取单元列表
@@ -310,3 +278,73 @@ def get_units():
     except Exception as e:
         print(f"获取单元列表失败: {str(e)}")
         return jsonify({'error': '获取单元列表失败'}), 500
+
+@maintenance_bp.route('/api/maintenance/debug/rooms', methods=['GET'])
+def debug_rooms():
+    try:
+        # 获取并打印请求参数
+        community_id = request.args.get('communityId', type=int)
+        building_number = request.args.get('buildingNumber')
+        district_number = request.args.get('districtNumber')
+        unit_number = request.args.get('unitNumber')
+        
+        print("\n=== 开始调试房间查询 ===")
+        print(f"请求参数:")
+        print(f"- 社区ID: {community_id}, 类型: {type(community_id)}")
+        print(f"- 区号: {district_number}, 类型: {type(district_number)}")
+        print(f"- 楼栋号: {building_number}, 类型: {type(building_number)}")
+        print(f"- 单元号: {unit_number}, 类型: {type(unit_number)}")
+        
+        # 查询所有匹配条件的房间
+        sql = text("""
+            SELECT 
+                h.*
+            FROM house_info h
+            WHERE h.community_id = :community_id
+            AND h.district_number = :district_number
+            AND h.building_number = :building_number
+            AND h.unit_number = :unit_number
+        """)
+        
+        result = db.session.execute(sql, {
+            'community_id': community_id,
+            'district_number': district_number,
+            'building_number': building_number,
+            'unit_number': unit_number
+        })
+        
+        rooms = result.fetchall()
+        print(f"\n=== 查询结果 ===")
+        print(f"总共查询到 {len(rooms)} 条记录")
+        
+        # 打印每条记录的详细信息
+        for room in rooms:
+            print("\n房间信息:")
+            print(f"- ID: {room.id}")
+            print(f"- 社区ID: {room.community_id}")
+            print(f"- 区号: {room.district_number}")
+            print(f"- 楼栋号: {room.building_number}")
+            print(f"- 单元号: {room.unit_number}")
+            print(f"- 房间号: {room.room_number}")
+            print(f"- 房间名: {room.house_full_name}")
+            print(f"- 房间级别: {room.house_level}")
+        
+        return jsonify({
+            'total': len(rooms),
+            'rooms': [{
+                'id': row.id,
+                'community_id': row.community_id,
+                'district_number': row.district_number,
+                'building_number': row.building_number,
+                'unit_number': row.unit_number,
+                'room_number': row.room_number,
+                'house_full_name': row.house_full_name,
+                'house_level': row.house_level
+            } for row in rooms]
+        })
+        
+    except Exception as e:
+        print("\n=== 调试查询出错 ===")
+        print(f"错误类型: {type(e).__name__}")
+        print(f"错误信息: {str(e)}")
+        return jsonify({'error': str(e)}), 500
