@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2150e5b-21bc-481a-bfc4-6aa35e4c4578" name="更改" comment="v0.1.2 完善了区域维护管理板块（报事报修、社区评价、投诉建议）内容为示例模板">
+    <list default="true" id="d2150e5b-21bc-481a-bfc4-6aa35e4c4578" name="更改" comment="v0.1.4 修改了报事报修的社区查询问题（楼栋有bug、房间号待定）">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/routes/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/common.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/routes/maintenance.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/maintenance.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/MaintenanceReport.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/MaintenanceReport.vue" afterDir="false" />
     </list>
@@ -213,7 +212,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741864929041</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="v0.1.4 修改了报事报修的社区查询问题（楼栋有bug、房间号待定）">
+      <option name="closed" value="true" />
+      <created>1742297941714</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1742297941714</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -272,6 +279,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="v0.0.1 硬件UDP通信端口（demo）" />
     <MESSAGE value="v0.1.1 新增了区域维护管理板块（报事报修、社区评价、投诉建议）内容为完成" />
-    <option name="LAST_COMMIT_MESSAGE" value="v0.1.1 新增了区域维护管理板块（报事报修、社区评价、投诉建议）内容为完成" />
+    <MESSAGE value="v0.1.4 修改了报事报修的社区查询问题（楼栋有bug、房间号待定）" />
+    <option name="LAST_COMMIT_MESSAGE" value="v0.1.4 修改了报事报修的社区查询问题（楼栋有bug、房间号待定）" />
   </component>
 </project>

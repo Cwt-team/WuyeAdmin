@@ -154,30 +154,159 @@ def get_buildings(community_id):
         print(f"获取楼栋列表失败: {str(e)}")
         return jsonify({'error': '获取楼栋列表失败'}), 500
 
-# 获取房间列表
-@maintenance_bp.route('/api/maintenance/rooms/<int:community_id>/<string:building_number>', methods=['GET'])
-def get_rooms(community_id, building_number):
+# 获取房间号列表
+@maintenance_bp.route('/api/maintenance/rooms', methods=['GET'])
+def get_rooms():
     try:
-        sql = """
-            SELECT id, room_number, house_full_name, owner_name, owner_phone
-            FROM house_info
-            WHERE community_id = :community_id
-            AND building_number = :building_number
-            AND house_level = 4
-            AND is_deleted = 0
-            ORDER BY CAST(room_number AS SIGNED)
-        """
-        rooms = db.session.execute(sql, {
+        community_id = request.args.get('communityId', type=int)
+        building_number = request.args.get('buildingNumber')
+        district_number = request.args.get('districtNumber')
+        
+        print(f"正在查询房间号，社区ID: {community_id}, 区号: {district_number}, 楼栋号: {building_number}")
+        
+        if not all([community_id, building_number]):
+            return jsonify([])
+            
+        # 先检查数据是否存在
+        check_sql = text("""
+            SELECT COUNT(*) as count
+            FROM house_info h
+            WHERE h.community_id = :community_id
+            AND h.building_number = :building_number
+            AND h.district_number = :district_number
+        """)
+        
+        count_result = db.session.execute(check_sql, {
             'community_id': community_id,
-            'building_number': building_number
-        }).fetchall()
+            'building_number': building_number,
+            'district_number': district_number
+        }).scalar()
+        
+        print(f"找到 {count_result} 条房屋数据")
+        
+        # 主查询
+        sql = text("""
+            SELECT DISTINCT
+                h.id,
+                h.room_number,
+                h.unit_number,
+                h.house_full_name,
+                h.house_level
+            FROM house_info h
+            WHERE h.community_id = :community_id
+            AND h.building_number = :building_number
+            AND h.district_number = :district_number
+            AND h.house_level = 3
+            ORDER BY 
+                CAST(h.unit_number AS SIGNED),
+                CAST(h.room_number AS SIGNED)
+        """)
+        
+        result = db.session.execute(sql, {
+            'community_id': community_id,
+            'building_number': building_number,
+            'district_number': district_number
+        })
+        
+        rooms = result.fetchall()
+        print(f"查询到 {len(rooms)} 个房间")
+        
+        if not rooms:
+            # 检查是否存在单元数据
+            unit_sql = text("""
+                SELECT DISTINCT
+                    h.id,
+                    h.unit_number,
+                    h.house_full_name
+                FROM house_info h
+                WHERE h.community_id = :community_id
+                AND h.building_number = :building_number
+                AND h.district_number = :district_number
+                AND h.house_level = 3
+            """)
+            
+            unit_result = db.session.execute(unit_sql, {
+                'community_id': community_id,
+                'building_number': building_number,
+                'district_number': district_number
+            })
+            
+            units = unit_result.fetchall()
+            print(f"查询到 {len(units)} 个单元")
+            
+            if units:
+                # 如果有单元数据，为每个单元生成房间
+                rooms = []
+                for unit in units:
+                    for floor in range(1, 19):  # 假设18层
+                        for room in range(1, 3):  # 假设每层2户
+                            room_number = f"{floor:02d}{room:02d}"
+                            rooms.append({
+                                'id': None,
+                                'room_number': room_number,
+                                'unit_number': unit.unit_number,
+                                'house_full_name': f"{unit.house_full_name}{room_number}室"
+                            })
+        
         return jsonify([{
-            'id': r.id,
-            'room_number': r.room_number,
-            'house_full_name': r.house_full_name,
-            'owner_name': r.owner_name,
-            'owner_phone': r.owner_phone
-        } for r in rooms])
+            'id': row.id if hasattr(row, 'id') else None,
+            'room_number': row.room_number if hasattr(row, 'room_number') else row['room_number'],
+            'unit_number': row.unit_number if hasattr(row, 'unit_number') else row['unit_number'],
+            'house_full_name': row.house_full_name if hasattr(row, 'house_full_name') else row['house_full_name']
+        } for row in rooms])
+        
     except Exception as e:
-        logging.error(f"获取房间列表失败: {str(e)}")
-        return jsonify({'error': '获取房间列表失败'}), 500
+        print(f"获取房间号列表失败: {str(e)}")
+        return jsonify({'error': '获取房间号列表失败'}), 500
+
+# 获取单元列表
+@maintenance_bp.route('/api/maintenance/units', methods=['GET'])
+def get_units():
+    try:
+        community_id = request.args.get('communityId', type=int)
+        building_number = request.args.get('buildingNumber')
+        district_number = request.args.get('districtNumber')
+        
+        print(f"正在查询单元，社区ID: {community_id}, 区号: {district_number}, 楼栋号: {building_number}")
+        
+        if not all([community_id, building_number, district_number]):
+            return jsonify([])
+            
+        sql = text("""
+            SELECT DISTINCT
+                h.id,
+                h.unit_number,
+                h.house_full_name
+            FROM house_info h
+            WHERE h.community_id = :community_id
+            AND h.building_number = :building_number
+            AND h.district_number = :district_number
+            AND h.house_level = 3
+            ORDER BY CAST(h.unit_number AS SIGNED)
+        """)
+        
+        result = db.session.execute(sql, {
+            'community_id': community_id,
+            'building_number': building_number,
+            'district_number': district_number
+        })
+        
+        units = result.fetchall()
+        print(f"查询到 {len(units)} 个单元")
+        
+        if not units:
+            # 如果没有单元数据，默认生成两个单元
+            units = [
+                {'id': None, 'unit_number': '1', 'house_full_name': '1单元'},
+                {'id': None, 'unit_number': '2', 'house_full_name': '2单元'}
+            ]
+        
+        return jsonify([{
+            'id': row.id if hasattr(row, 'id') else row['id'],
+            'unit_number': row.unit_number if hasattr(row, 'unit_number') else row['unit_number'],
+            'house_full_name': row.house_full_name if hasattr(row, 'house_full_name') else row['house_full_name']
+        } for row in units])
+        
+    except Exception as e:
+        print(f"获取单元列表失败: {str(e)}")
+        return jsonify({'error': '获取单元列表失败'}), 500

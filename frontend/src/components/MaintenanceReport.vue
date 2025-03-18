@@ -19,7 +19,7 @@
         </el-select>
       </el-form-item>
       
-      <!-- 新增楼栋查询 -->
+      <!-- 楼栋选择 -->
       <el-form-item label="楼栋">
         <el-select 
           v-model="filters.building" 
@@ -38,18 +38,36 @@
         </el-select>
       </el-form-item>
 
-      <!-- 新增房间号查询 -->
+      <!-- 单元选择 -->
+      <el-form-item label="单元">
+        <el-select 
+          v-model="filters.unit" 
+          placeholder="请选择单元"
+          :disabled="!filters.building"
+          @change="handleUnitChange"
+          class="large-select"
+        >
+          <el-option
+            v-for="item in unitOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
+
+      <!-- 房间号查询 -->
       <el-form-item label="房间号">
         <el-select 
           v-model="filters.roomNumber" 
           placeholder="请选择房间号" 
           clearable
-          :disabled="!filters.building"
+          :disabled="!filters.unit"
           class="large-select"
         >
           <el-option
             v-for="item in roomOptions"
-            :key="item.room_number"
+            :key="item.id"
             :label="item.house_full_name"
             :value="item.room_number"
           />
@@ -209,8 +227,9 @@ export default {
       detailDialogVisible: false,
       filters: {
         community: '',
-        building: '',    // 新增楼栋筛选
-        roomNumber: '',  // 新增房间号筛选
+        building: '',
+        unit: '',
+        roomNumber: '',
         status: '',
         dateRange: [],
       },
@@ -243,7 +262,9 @@ export default {
       tableHeight: 500,
       resizeTimer: null,
       buildingOptions: [],
-      roomOptions: []
+      unitOptions: [],
+      roomOptions: [],
+      selectedDistrict: '',
     };
   },
   methods: {
@@ -254,8 +275,9 @@ export default {
           page: this.pagination.currentPage,
           size: this.pagination.pageSize,
           community: this.filters.community,
-          building: this.filters.building,         // 新增楼栋参数
-          roomNumber: this.filters.roomNumber,     // 新增房间号参数
+          building: this.filters.building,
+          unit: this.filters.unit,
+          roomNumber: this.filters.roomNumber,
           status: this.filters.status,
           startDate: this.filters.dateRange[0],
           endDate: this.filters.dateRange[1]
@@ -369,8 +391,9 @@ export default {
     handleReset() {
       this.filters = {
         community: '',
-        building: '',    // 重置楼栋
-        roomNumber: '',  // 重置房间号
+        building: '',
+        unit: '',
+        roomNumber: '',
         status: '',
         dateRange: []
       };
@@ -453,23 +476,43 @@ export default {
     async handleCommunityChange(communityId) {
       if (!communityId) {
         this.buildingOptions = [];
+        this.unitOptions = [];
+        this.roomOptions = [];
         this.filters.building = '';
+        this.filters.unit = '';
         this.filters.roomNumber = '';
         return;
       }
       
-      console.log('社区变更，ID:', communityId); // 添加日志
+      console.log('社区变更，ID:', communityId);
       await this.fetchBuildings(communityId);
     },
 
     // 监听楼栋选择变化
     async handleBuildingChange(buildingNumber) {
-      this.filters.roomNumber = '';
-      this.roomOptions = [];
-      
-      if (buildingNumber) {
-        await this.fetchRooms(this.filters.community, buildingNumber);
+      if (!buildingNumber) {
+        this.unitOptions = [];
+        this.roomOptions = [];
+        this.filters.unit = '';
+        this.filters.roomNumber = '';
+        return;
       }
+      
+      const selectedBuilding = this.buildingOptions.find(b => b.value === buildingNumber);
+      if (selectedBuilding) {
+        this.selectedDistrict = selectedBuilding.district_number;
+        await this.fetchUnits();
+      }
+    },
+
+    // 监听单元选择变化
+    async handleUnitChange(unitNumber) {
+      if (!unitNumber) {
+        this.roomOptions = [];
+        this.filters.roomNumber = '';
+        return;
+      }
+      await this.fetchRooms();
     },
 
     // 获取楼栋列表
@@ -481,12 +524,13 @@ export default {
         
         this.buildingOptions = response.data.map(item => ({
           value: item.building_number,
-          label: item.house_full_name
+          label: item.house_full_name,
+          district_number: item.district_number
         }));
         
-        // 如果只有一个楼栋，自动选择
         if (this.buildingOptions.length === 1) {
           this.filters.building = this.buildingOptions[0].value;
+          await this.handleBuildingChange(this.buildingOptions[0].value);
         }
       } catch (error) {
         console.error('获取楼栋列表失败:', error);
@@ -494,20 +538,61 @@ export default {
       }
     },
 
-    // 获取房间列表
-    async fetchRooms(communityId, buildingNumber) {
+    // 获取单元列表
+    async fetchUnits() {
       try {
-        const response = await axios.get(`/api/maintenance/rooms/${communityId}/${buildingNumber}`);
-        this.roomOptions = response.data.map(item => ({
-          value: item.room_number,      // 使用 room_number 作为值
-          label: item.house_full_name,  // 使用完整名称作为显示
-          id: item.id,                  // 保存 id 用于提交报修
-          ownerName: item.owner_name,   // 保存业主信息
-          ownerPhone: item.owner_phone  // 保存联系电话
+        if (!this.filters.community || !this.filters.building || !this.selectedDistrict) {
+          return;
+        }
+        
+        const response = await axios.get('/api/maintenance/units', {
+          params: {
+            communityId: this.filters.community,
+            buildingNumber: this.filters.building,
+            districtNumber: this.selectedDistrict
+          }
+        });
+        
+        this.unitOptions = response.data.map(item => ({
+          value: item.unit_number,
+          label: `${item.unit_number}单元`
         }));
+        
+        if (this.unitOptions.length === 1) {
+          this.filters.unit = this.unitOptions[0].value;
+          await this.handleUnitChange(this.unitOptions[0].value);
+        }
       } catch (error) {
-        console.error('获取房间列表失败:', error);
-        this.$message.error('获取房间列表失败');
+        console.error('获取单元列表失败:', error);
+        this.$message.error('获取单元列表失败');
+      }
+    },
+
+    // 获取房间号列表
+    async fetchRooms() {
+      try {
+        if (!this.filters.community || !this.filters.building || !this.selectedDistrict) {
+          return;
+        }
+        
+        console.log('正在获取房间号数据');
+        const response = await axios.get('/api/maintenance/rooms', {
+          params: {
+            communityId: this.filters.community,
+            buildingNumber: this.filters.building,
+            districtNumber: this.selectedDistrict
+          }
+        });
+        
+        console.log('获取到的房间号数据:', response.data);
+        this.roomOptions = response.data;
+        
+        if (this.roomOptions.length === 1) {
+          this.filters.roomNumber = this.roomOptions[0].room_number;
+        }
+      } catch (error) {
+        console.error('获取房间号列表失败:', error);
+        this.$message.error('获取房间号列表失败');
       }
     }
   },
