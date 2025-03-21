@@ -46,6 +46,7 @@ def get_maintenance_list():
             
         # 计算总数
         total = query.count()
+        logger.debug(f"查询到总记录数: {total}")
         
         # 获取分页数据
         items = query.order_by(MaintenanceRequest.report_time.desc())\
@@ -53,16 +54,22 @@ def get_maintenance_list():
             .limit(size)\
             .all()
             
-        logger.debug(f"查询到 {len(items)} 条记录")
+        logger.debug(f"当前页查询到 {len(items)} 条记录")
         
-        return jsonify({
+        # 转换数据并返回
+        result = {
             'items': [item.to_dict() for item in items],
             'total': total
-        })
+        }
+        logger.info("维修列表请求处理完成")
+        return jsonify(result)
         
     except Exception as e:
         logger.error(f"获取报修列表失败: {str(e)}", exc_info=True)
-        return jsonify({'message': '获取报修列表失败', 'error': str(e)}), 500 
+        return jsonify({
+            'message': '获取报修列表失败',
+            'error': str(e)
+        }), 500
 
 # 获取社区列表
 @maintenance_bp.route('/api/maintenance/communities', methods=['GET'])

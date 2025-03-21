@@ -54,13 +54,13 @@ class MaintenanceRequest(db.Model):
         try:
             return {
                 'id': self.id,
-                'requestNumber': self.request_number,
+                'request_number': self.request_number, # 报修单号
                 'communityId': self.community_id,
                 'communityName': self.community.community_name if self.community else None,
                 'houseId': self.house_id,
-                'houseName': self.house.house_full_name if self.house else None,
-                'reporterName': self.reporter_name,
-                'reporterPhone': self.reporter_phone,
+                'house_full_name': self.house.house_full_name if self.house else None,
+                'reporter_name': self.reporter_name,   #报修人
+                'reporter_phone': self.reporter_phone,   #报修人电话
                 'title': self.title,
                 'description': self.description,
                 'type': self.type,
@@ -68,7 +68,7 @@ class MaintenanceRequest(db.Model):
                 'expectedTime': self.expected_time.strftime('%Y-%m-%d %H:%M:%S') if self.expected_time else None,
                 'images': json.loads(self.images) if self.images else [],
                 'status': self.status,
-                'reportTime': self.report_time.strftime('%Y-%m-%d %H:%M:%S') if self.report_time else None,
+                'report_time': self.report_time.strftime('%Y-%m-%d %H:%M:%S') if self.report_time else None,
                 'assignTime': self.assign_time.strftime('%Y-%m-%d %H:%M:%S') if self.assign_time else None,
                 'processTime': self.process_time.strftime('%Y-%m-%d %H:%M:%S') if self.process_time else None,
                 'completeTime': self.complete_time.strftime('%Y-%m-%d %H:%M:%S') if self.complete_time else None,
