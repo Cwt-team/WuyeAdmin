@@ -355,3 +355,155 @@ def debug_rooms():
         print(f"错误类型: {type(e).__name__}")
         print(f"错误信息: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+# 受理报修
+@maintenance_bp.route('/api/maintenance/<int:id>/process', methods=['POST'])
+def process_maintenance(id):
+    logger.info(f"开始处理维修受理请求, ID: {id}")
+    try:
+        # 获取请求数据
+        data = request.get_json()
+        logger.debug(f"请求数据: {data}")
+        
+        notes = data.get('notes')
+        handler_name = data.get('handler_name')
+        handler_phone = data.get('handler_phone')
+
+        if not all([notes, handler_name, handler_phone]):
+            logger.warning("缺少必要参数")
+            return jsonify({
+                'code': 400,
+                'message': '缺少必要参数'
+            })
+
+        # 查找并更新维修请求
+        maintenance = MaintenanceRequest.query.get(id)
+        if not maintenance:
+            logger.warning(f"未找到ID为{id}的维修请求")
+            return jsonify({
+                'code': 404,
+                'message': '未找到维修请求'
+            })
+
+        if maintenance.status != 'pending':
+            logger.warning(f"维修请求状态不是待处理，当前状态: {maintenance.status}")
+            return jsonify({
+                'code': 400,
+                'message': '只能受理待处理的报修'
+            })
+
+        # 更新状态
+        maintenance.status = 'processing'
+        maintenance.handler_name = handler_name
+        maintenance.handler_phone = handler_phone
+        maintenance.notes = notes
+        maintenance.process_time = datetime.now()
+
+        db.session.commit()
+        logger.info(f"维修请求 {id} 已成功受理")
+
+        return jsonify({
+            'code': 200,
+            'message': '报修已受理'
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"受理报修失败: {str(e)}", exc_info=True)
+        return jsonify({
+            'code': 500,
+            'message': '受理报修失败',
+            'error': str(e)
+        }), 500
+
+# 完成报修
+@maintenance_bp.route('/api/maintenance/<int:id>/complete', methods=['POST'])
+def complete_maintenance(id):
+    logger.info(f"开始处理维修完成请求, ID: {id}")
+    try:
+        data = request.get_json()
+        logger.debug(f"请求数据: {data}")
+        
+        notes = data.get('notes')
+        if not notes:
+            logger.warning("缺少完成备注")
+            return jsonify({
+                'code': 400,
+                'message': '请输入完成备注'
+            })
+
+        maintenance = MaintenanceRequest.query.get(id)
+        if not maintenance:
+            logger.warning(f"未找到ID为{id}的维修请求")
+            return jsonify({
+                'code': 404,
+                'message': '未找到维修请求'
+            })
+
+        if maintenance.status != 'processing':
+            logger.warning(f"维修请求状态不是处理中，当前状态: {maintenance.status}")
+            return jsonify({
+                'code': 400,
+                'message': '只能完成处理中的报修'
+            })
+
+        maintenance.status = 'completed'
+        maintenance.complete_notes = notes
+        maintenance.complete_time = datetime.now()
+
+        db.session.commit()
+        logger.info(f"维修请求 {id} 已完成")
+
+        return jsonify({
+            'code': 200,
+            'message': '报修已完成'
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"完成报修失败: {str(e)}", exc_info=True)
+        return jsonify({
+            'code': 500,
+            'message': '完成报修失败',
+            'error': str(e)
+        }), 500
+
+# 取消报修
+@maintenance_bp.route('/api/maintenance/<int:id>/cancel', methods=['POST'])
+def cancel_maintenance(id):
+    logger.info(f"开始处理维修取消请求, ID: {id}")
+    try:
+        maintenance = MaintenanceRequest.query.get(id)
+        if not maintenance:
+            logger.warning(f"未找到ID为{id}的维修请求")
+            return jsonify({
+                'code': 404,
+                'message': '未找到维修请求'
+            })
+
+        if maintenance.status != 'pending':
+            logger.warning(f"维修请求状态不是待处理，当前状态: {maintenance.status}")
+            return jsonify({
+                'code': 400,
+                'message': '只能取消待处理的报修'
+            })
+
+        maintenance.status = 'cancelled'
+        maintenance.cancel_time = datetime.now()
+
+        db.session.commit()
+        logger.info(f"维修请求 {id} 已取消")
+
+        return jsonify({
+            'code': 200,
+            'message': '报修已取消'
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"取消报修失败: {str(e)}", exc_info=True)
+        return jsonify({
+            'code': 500,
+            'message': '取消报修失败',
+            'error': str(e)
+        }), 500

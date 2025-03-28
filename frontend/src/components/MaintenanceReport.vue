@@ -179,6 +179,7 @@
       v-model="detailDialogVisible"
       title="报修详情"
       width="50%"
+      destroy-on-close
     >
       <div v-if="currentRequest" class="detail-container">
         <el-descriptions :column="2" border>
@@ -189,27 +190,36 @@
           <el-descriptions-item label="报修标题">{{ currentRequest.title }}</el-descriptions-item>
           <el-descriptions-item label="报修类型">{{ currentRequest.typeText }}</el-descriptions-item>
           <el-descriptions-item label="优先级">{{ currentRequest.priorityText }}</el-descriptions-item>
-          <el-descriptions-item label="状态">{{ currentRequest.statusText }}</el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag :type="getStatusType(currentRequest.status)">
+              {{ getStatusText(currentRequest.status) }}
+            </el-tag>
+          </el-descriptions-item>
           <el-descriptions-item label="问题描述" :span="2">{{ currentRequest.description }}</el-descriptions-item>
           <el-descriptions-item label="报修时间">{{ currentRequest.report_time }}</el-descriptions-item>
           <el-descriptions-item label="期望上门时间">{{ currentRequest.expected_time }}</el-descriptions-item>
           <el-descriptions-item label="处理人" v-if="currentRequest.handler_name">{{ currentRequest.handler_name }}</el-descriptions-item>
           <el-descriptions-item label="处理人电话" v-if="currentRequest.handler_phone">{{ currentRequest.handler_phone }}</el-descriptions-item>
           <el-descriptions-item label="处理备注" v-if="currentRequest.notes" :span="2">{{ currentRequest.notes }}</el-descriptions-item>
+          
+          <!-- 添加图片展示区域 -->
+          <el-descriptions-item label="报修图片" :span="2" v-if="currentRequest.images && currentRequest.images.length">
+            <el-image
+              v-for="(img, index) in currentRequest.images"
+              :key="index"
+              :src="img"
+              :preview-src-list="currentRequest.images"
+              fit="cover"
+              class="repair-image"
+            />
+          </el-descriptions-item>
         </el-descriptions>
-        
-        <div v-if="currentRequest.images" class="images-container">
-          <h4>相关图片</h4>
-          <el-image
-            v-for="(img, index) in JSON.parse(currentRequest.images)"
-            :key="index"
-            :src="img"
-            :preview-src-list="JSON.parse(currentRequest.images)"
-            fit="cover"
-            class="preview-image"
-          />
-        </div>
       </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="detailDialogVisible = false">关闭</el-button>
+        </span>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -221,6 +231,10 @@ export default {
   name: 'MaintenanceReport',
   data() {
     return {
+      currentUser: {
+        name: '管理员',
+        phone: '13800138000'
+      },
       requests: [],
       loading: false,
       currentRequest: null,
@@ -348,6 +362,11 @@ export default {
 
     async handleProcess(row) {
       try {
+        if (!this.currentUser || !this.currentUser.name || !this.currentUser.phone) {
+          this.$message.error('未获取到处理人信息，请检查登录状态');
+          return;
+        }
+
         const { value: formData } = await this.$prompt('请输入处理信息', '受理报修', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -355,19 +374,34 @@ export default {
           inputPlaceholder: '请输入处理备注'
         });
 
-        await axios.post('/api/maintenance/process', {
+        if (!formData) {
+          this.$message.warning('请输入处理备注');
+          return;
+        }
+
+        console.log('发送受理请求:', {
           id: row.id,
-          handler_name: '当前登录用户名',
-          handler_phone: '当前登录用户电话',
-          notes: formData
+          notes: formData,
+          handler_name: this.currentUser.name,
+          handler_phone: this.currentUser.phone
         });
 
-        this.$message.success('报修已受理');
-        this.fetchData();
+        const response = await axios.post(`/api/maintenance/${row.id}/process`, {
+          notes: formData,
+          handler_name: this.currentUser.name,
+          handler_phone: this.currentUser.phone
+        });
+
+        if (response.data.code === 200) {
+          this.$message.success(response.data.message || '报修已受理');
+          this.fetchData();
+        } else {
+          throw new Error(response.data.message || '受理失败');
+        }
       } catch (error) {
         if (error !== 'cancel') {
           console.error('受理报修失败:', error);
-          this.$message.error('受理报修失败');
+          this.$message.error(error.response?.data?.message || '受理报修失败');
         }
       }
     },
@@ -595,6 +629,16 @@ export default {
         console.error('获取房间号列表失败:', error);
         this.$message.error('获取房间号列表失败');
       }
+    },
+
+    getStatusType(status) {
+      const statusMap = {
+        pending: 'info',
+        processing: 'warning',
+        completed: 'success',
+        cancelled: 'danger'
+      };
+      return statusMap[status] || 'info';
     }
   },
   mounted() {
@@ -648,14 +692,24 @@ export default {
   padding: 20px;
 }
 
-.images-container {
-  margin-top: 20px;
+.detail-container .el-descriptions {
+  margin-bottom: 20px;
 }
 
-.preview-image {
+.detail-container :deep(.el-descriptions__label) {
+  width: 120px;
+  font-weight: bold;
+}
+
+.detail-container :deep(.el-descriptions__content) {
+  word-break: break-all;
+}
+
+.repair-image {
   width: 100px;
   height: 100px;
-  margin: 5px;
+  margin-right: 10px;
+  margin-bottom: 10px;
   border-radius: 4px;
   cursor: pointer;
 }
