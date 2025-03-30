@@ -12,7 +12,7 @@
         <CommunityReviews />
       </el-tab-pane>
       <el-tab-pane label="投诉建议" name="complaints">
-        <ComplaintSuggestions />
+        <ComplaintSuggestionPage />
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -21,14 +21,14 @@
 <script>
 import MaintenanceRequests from '@/components/MaintenanceRequests.vue'
 import CommunityReviews from '@/components/CommunityReviews.vue'
-import ComplaintSuggestions from '@/components/ComplaintSuggestions.vue'
+import ComplaintSuggestionPage from '@/components/ComplaintSuggestionPage.vue'
 
 export default {
   name: 'AreaMaintenanceView',
   components: {
     MaintenanceRequests,
     CommunityReviews,
-    ComplaintSuggestions
+    ComplaintSuggestionPage
   },
   props: {
     activeTab: {

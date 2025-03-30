@@ -16,12 +16,15 @@ def get_communities():
     try:
         logger.debug("获取社区列表")
         communities = CommunityInfo.query.filter_by(status=1).all()
-        result = [{'id': c.id, 'name': c.community_name} for c in communities]
+        result = [{
+            'id': c.id, 
+            'community_name': c.community_name
+        } for c in communities]
         logger.debug(f"获取到{len(result)}个社区")
         return jsonify(result)
     except Exception as e:
         logger.error(f"获取社区列表失败: {str(e)}")
-        return jsonify([]), 200  # 返回空数组而不是错误，避免前端报错
+        return jsonify({'error': str(e)}), 500
 
 # 获取区域列表
 @common_bp.route('/api/districts', methods=['GET'])

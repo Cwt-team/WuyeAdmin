@@ -307,6 +307,10 @@ export default {
         }));
         
         this.pagination.total = response.data.total;
+        
+        // 添加成功提示
+        this.$message.success(`数据加载成功，共 ${response.data.total} 条记录`);
+
       } catch (error) {
         console.error('获取报修列表失败:', error);
         this.$message.error('获取报修列表失败');

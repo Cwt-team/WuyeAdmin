@@ -18,7 +18,16 @@ from routes.unlock_record import unlock_record_bp
 from models.personal_info import PersonalInfo
 from routes.personal_info import personal_info_bp
 from routes.maintenance import maintenance_bp
+from routes.community_review import community_review_bp
+from routes.complaint import complaint_bp
+from routes.area_maintenance import area_maintenance_bp
 import logging
+
+# 调整 SQLAlchemy 日志级别
+logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)  # 或者 logging.ERROR
+
+# 如果想完全禁用
+# logging.getLogger('sqlalchemy.engine').disabled = True
 
 # 配置日志
 logging.basicConfig(
@@ -56,6 +65,9 @@ def create_app():
     app.register_blueprint(alarm_record_bp)
     app.register_blueprint(unlock_record_bp)
     app.register_blueprint(personal_info_bp)
+    app.register_blueprint(community_review_bp)
+    app.register_blueprint(complaint_bp)
+    app.register_blueprint(area_maintenance_bp)
 
     @app.before_request
     def log_request_info():
