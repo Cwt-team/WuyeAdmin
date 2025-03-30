@@ -11,22 +11,19 @@ class PersonalInfo(db.Model):
     phone_number = db.Column(db.String(20), unique=True)                                                #手机号码（带国际区号格式）
     email = db.Column(db.String(100), unique=True)                                                      #电子邮箱（需符合邮箱格式）
     profile_picture_path = db.Column(db.String(200))                                                    #头像路径（支持云存储URL）
-    password = db.Column(db.String(50), nullable=False)                                                 #登录密码（建议使用BCrypt加密）
+    password = db.Column(db.String(50), nullable=False)                                                 #登录密码
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)                           #账户创建时间
     updated_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now, onupdate=datetime.now)   #最后更新时间
 
     def to_dict(self):
-        """模型序列化方法（用于接口响应）
-
-                安全注意事项：
-                - 排除敏感字段：密码及时间戳字段
-                - 字段命名转换：蛇形命名转驼峰式
-                """
+        """模型序列化方法（用于接口响应）"""
         return {
             'id': self.id,
-            'accountNumber': self.account_number,
+            'username': self.account_number,  # 前端使用 username
             'nickname': self.nickname,
             'phoneNumber': self.phone_number,
             'email': self.email,
-            'profilePicturePath': self.profile_picture_path
+            'profilePicturePath': self.profile_picture_path,
+            'createdAt': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'updatedAt': self.updated_at.strftime('%Y-%m-%d %H:%M:%S')
         } 

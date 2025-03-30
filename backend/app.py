@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, session
+from flask import Flask, jsonify, request, session, send_from_directory
 from flask_cors import CORS
 from db import db, init_db
 from routes.community import community_bp
@@ -22,6 +22,7 @@ from routes.community_review import community_review_bp
 from routes.complaint import complaint_bp
 from routes.area_maintenance import area_maintenance_bp
 import logging
+import os
 
 # 调整 SQLAlchemy 日志级别
 logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)  # 或者 logging.ERROR
@@ -236,6 +237,13 @@ def create_app():
     def handle_500_error(error):
         print('Server Error:', error)  # 在控制台打印详细错误信息
         return jsonify({'error': 'Internal Server Error'}), 500
+
+    # 添加静态文件路由
+    @app.route('/static/uploads/avatars/<filename>')
+    def get_avatar(filename):
+        upload_folder = os.path.join(app.root_path, 'static', 'uploads', 'avatars')
+        os.makedirs(upload_folder, exist_ok=True)
+        return send_from_directory(upload_folder, filename)
 
     return app
 
