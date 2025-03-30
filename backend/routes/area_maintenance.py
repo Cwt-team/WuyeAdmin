@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request
-from models.area_maintenance import MaintenanceRequest, CommunityReview, ComplaintSuggestion
+from models.area_maintenance import MaintenanceRequest, CommunityReview
 from db import db
 from datetime import datetime
+import logging
 
 area_maintenance_bp = Blueprint('area_maintenance', __name__)
 
@@ -49,33 +50,6 @@ def get_community_reviews():
         return jsonify({
             'total': total,
             'items': [review.to_dict() for review in reviews]
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@area_maintenance_bp.route('/api/complaint-suggestions', methods=['GET'])
-def get_complaint_suggestions():
-    try:
-        community_id = request.args.get('communityId')
-        type = request.args.get('type')
-        status = request.args.get('status')
-        page = int(request.args.get('page', 1))
-        size = int(request.args.get('size', 10))
-
-        query = ComplaintSuggestion.query
-        if community_id:
-            query = query.filter(ComplaintSuggestion.community_id == community_id)
-        if type:
-            query = query.filter(ComplaintSuggestion.type == type)
-        if status:
-            query = query.filter(ComplaintSuggestion.status == status)
-
-        total = query.count()
-        items = query.offset((page - 1) * size).limit(size).all()
-
-        return jsonify({
-            'total': total,
-            'items': [item.to_dict() for item in items]
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500 
