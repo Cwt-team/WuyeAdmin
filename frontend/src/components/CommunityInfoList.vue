@@ -22,8 +22,50 @@
           />
         </el-col>
 
+        <!-- 门禁卡类型 -->
+        <el-col :span="6">
+          <el-select v-model="search.accessCardType" placeholder="门禁卡类型" clearable>
+            <el-option label="NFC" value="NFC" />
+            <el-option label="IC卡" value="IC卡" />
+          </el-select>
+        </el-col>
+
+        <!-- 启用状态 -->
+        <el-col :span="6">
+          <el-select v-model="search.isEnabled" placeholder="启用状态" clearable>
+            <el-option label="启用" :value="1" />
+            <el-option label="禁用" :value="0" />
+          </el-select>
+        </el-col>
+      </el-row>
+
+      <el-row :gutter="20" class="mb-4">
+        <!-- APP人脸录入 -->
+        <el-col :span="6">
+          <el-select v-model="search.appRecordFace" placeholder="APP人脸录入" clearable>
+            <el-option label="开启" :value="1" />
+            <el-option label="关闭" :value="0" />
+          </el-select>
+        </el-col>
+
+        <!-- 记录上传 -->
+        <el-col :span="6">
+          <el-select v-model="search.isRecordUpload" placeholder="记录上传" clearable>
+            <el-option label="开启" :value="1" />
+            <el-option label="关闭" :value="0" />
+          </el-select>
+        </el-col>
+
+        <!-- 配置同步 -->
+        <el-col :span="6">
+          <el-select v-model="search.isSameStep" placeholder="配置同步" clearable>
+            <el-option label="已同步" :value="1" />
+            <el-option label="未同步" :value="0" />
+          </el-select>
+        </el-col>
+
         <!-- 操作按钮 -->
-        <el-col :span="12">
+        <el-col :span="6">
           <el-button type="primary" @click="searchCommunity">查询</el-button>
           <el-button type="success" @click="addCommunity">添加小区</el-button>
         </el-col>
@@ -162,7 +204,12 @@ export default {
     return {
       search: {
         keyword: '',
-        location: ''
+        location: '',
+        accessCardType: '',
+        isEnabled: null,
+        appRecordFace: null,
+        isRecordUpload: null,
+        isSameStep: null
       },
       communityList: [],
       total: 0,
@@ -223,19 +270,40 @@ export default {
           params: {
             keyword: this.search.keyword,
             location: this.search.location,
+            accessCardType: this.search.accessCardType,
+            isEnabled: this.search.isEnabled,
+            appRecordFace: this.search.appRecordFace,
+            isRecordUpload: this.search.isRecordUpload,
+            isSameStep: this.search.isSameStep,
             page: this.currentPage,
             size: this.pageSize
           }
         })
 
         if (response.data) {
-          this.communityList = response.data.items
+          // 直接使用返回的数据结构
+          this.communityList = response.data.items.map(item => ({
+            id: item.id,
+            code: item.communityNumber,
+            name: item.communityName,
+            location: item.communityCity,
+            createTime: item.creationTime,
+            accessCardType: item.accessCardType,
+            appRecordFace: item.appRecordFace,
+            isEnabled: item.isEnabled,
+            isRecordUpload: item.isRecordUpload,
+            isSameStep: item.isSameStep,
+            managerMachineCount: item.managementMachineQuantity,
+            indoorMachineCount: item.indoorMachineQuantity
+          }))
           this.total = response.data.total
           this.$message.success('数据加载成功')
+        } else {
+          throw new Error('返回数据格式不正确')
         }
       } catch (error) {
         console.error('获取小区列表失败:', error)
-        this.$message.error('获取数据失败，显示模拟数据')
+        this.$message.error('获取数据失败')
         this.communityList = this.mockData
         this.total = this.mockData.length
       } finally {

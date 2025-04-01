@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from datetime import datetime
 from sqlalchemy import desc
 from models.area_maintenance import CommunityReview
-from models.community import CommunityInfo
+from models.community_info import CommunityInfo
 from models.personal_info import PersonalInfo
 from db import db
 from sqlalchemy.sql import text

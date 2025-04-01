@@ -3,6 +3,7 @@ from datetime import datetime
 
 class CommunityInfo(db.Model):
     __tablename__ = 'community_info'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     community_number = db.Column(db.String(50), unique=True, nullable=False, default='', comment='小区编号')

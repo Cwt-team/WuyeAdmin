@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from models.complaint import Complaint
-from models.community import CommunityInfo
+from models.community_info import CommunityInfo
 from db import db
 from sqlalchemy import text
 from datetime import datetime

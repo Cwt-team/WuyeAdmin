@@ -8,7 +8,6 @@ from routes.community_admin import community_admin_bp
 from routes.property_admin import property_admin_bp
 from routes.owner import owner_bp
 from routes.owner_application import owner_application_bp
-from routes.house_query import house_query_bp
 from routes.room_notification import room_notification_bp
 from routes.community_notification import community_notification_bp
 from routes.advertisement import advertisement_bp
@@ -24,8 +23,8 @@ from routes.area_maintenance import area_maintenance_bp
 import logging
 import os
 
-# 调整 SQLAlchemy 日志级别
-logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)  # 或者 logging.ERROR
+# 设置 SQLAlchemy 的日志级别为 WARNING 或更高
+logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
 # 如果想完全禁用
 # logging.getLogger('sqlalchemy.engine').disabled = True
@@ -58,7 +57,6 @@ def create_app():
     app.register_blueprint(property_admin_bp)
     app.register_blueprint(owner_bp)
     app.register_blueprint(owner_application_bp)
-    app.register_blueprint(house_query_bp)
     app.register_blueprint(room_notification_bp)
     app.register_blueprint(community_notification_bp)
     app.register_blueprint(advertisement_bp)

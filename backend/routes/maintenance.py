@@ -3,7 +3,7 @@ from db import db
 from datetime import datetime
 import logging
 from models.maintenance_request import MaintenanceRequest
-from models.community import CommunityInfo
+from models.community_info import CommunityInfo
 from models.house import HouseInfo
 from sqlalchemy import text
 

@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from models.community import CommunityInfo
+from models.community_info import CommunityInfo
 from db import db
 from datetime import datetime
 
@@ -11,13 +11,18 @@ def get_communities():
         # 获取查询参数
         keyword = request.args.get('keyword', '')
         location = request.args.get('location', '')
+        access_card_type = request.args.get('accessCardType', '')
+        is_enabled = request.args.get('isEnabled')
+        app_record_face = request.args.get('appRecordFace')
+        is_record_upload = request.args.get('isRecordUpload')
+        is_same_step = request.args.get('isSameStep')
         page = int(request.args.get('page', 1))
         size = int(request.args.get('size', 10))
         
-        print(f"查询参数: keyword={keyword}, location={location}, page={page}, size={size}")
-        
         # 构建查询
         query = CommunityInfo.query
+
+        # 关键字搜索（小区名称或编号）
         if keyword:
             query = query.filter(
                 db.or_(
@@ -25,18 +30,39 @@ def get_communities():
                     CommunityInfo.community_number.like(f'%{keyword}%')
                 )
             )
+        
+        # 城市搜索
         if location:
             query = query.filter(CommunityInfo.community_city.like(f'%{location}%'))
             
-        print("SQL查询构建完成")
+        # 门禁卡类型过滤
+        if access_card_type:
+            query = query.filter(CommunityInfo.access_card_type == access_card_type)
+            
+        # 启用状态过滤
+        if is_enabled is not None:
+            query = query.filter(CommunityInfo.is_enabled == int(is_enabled))
+            
+        # APP人脸录入过滤
+        if app_record_face is not None:
+            query = query.filter(CommunityInfo.app_record_face == int(app_record_face))
+            
+        # 记录上传开关过滤
+        if is_record_upload is not None:
+            query = query.filter(CommunityInfo.is_record_upload == int(is_record_upload))
+            
+        # 配置同步状态过滤
+        if is_same_step is not None:
+            query = query.filter(CommunityInfo.is_same_step == int(is_same_step))
             
         # 计算总数
         total = query.count()
-        print(f"总记录数: {total}")
+        
+        # 添加排序（按创建时间倒序）
+        query = query.order_by(CommunityInfo.created_at.desc())
         
         # 分页查询
         communities = query.offset((page-1)*size).limit(size).all()
-        print(f"查询到的记录数: {len(communities)}")
         
         return jsonify({
             'total': total,
@@ -45,7 +71,10 @@ def get_communities():
         
     except Exception as e:
         print(f"发生错误: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({
+            'error': '查询失败',
+            'message': str(e)
+        }), 500
 
 @community_bp.route('/api/communities', methods=['POST'])
 def add_community():

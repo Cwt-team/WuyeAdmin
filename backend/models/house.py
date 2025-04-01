@@ -47,17 +47,34 @@ class HouseInfo(db.Model):
 
     # 定义一个实例方法，将对象转换成字典格式，便于序列化（如返回 JSON 数据）
     def to_dict(self):
+        # 根据不同层级计算实际的子节点数量
+        children_count = 0
+        if self.house_level == 1:  # 区级，统计下属楼栋数
+            children_count = HouseInfo.query.filter_by(
+                parent_id=self.id,
+                house_level=2  # 楼栋级
+            ).count()
+        elif self.house_level == 2:  # 楼栋级，统计下属单元数
+            children_count = HouseInfo.query.filter_by(
+                parent_id=self.id,
+                house_level=3  # 单元级
+            ).count()
+        elif self.house_level == 3:  # 单元级，统计下属房间数
+            children_count = HouseInfo.query.filter_by(
+                parent_id=self.id,
+                house_level=4  # 房间级
+            ).count()
+
         return {
-            'id': self.id,  # 房屋的主键 ID
-            'communityId': self.community_id,  # 所属社区的 ID
-            'districtNumber': self.district_number,  # 区号
-            'buildingNumber': self.building_number,  # 楼栋号
-            'unitNumber': self.unit_number,  # 单元号
-            'roomNumber': self.room_number,  # 房间号
-            'fullName': self.house_full_name,  # 房屋的完整名称
-            'level': self.house_level,  # 房屋层级（例如区、栋、单元）
-            'parentId': self.parent_id,  # 父级房屋的 ID
-            'createTime': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),  # 格式化后的创建时间
-            # 如果当前房屋有子房屋，则返回子房屋数量，否则返回 0
-            'count': len(self.children) if self.children else 0
+            'id': self.id,
+            'communityId': self.community_id,
+            'districtNumber': self.district_number,
+            'buildingNumber': self.building_number,
+            'unitNumber': self.unit_number,
+            'roomNumber': self.room_number,
+            'fullName': self.house_full_name,
+            'level': self.house_level,
+            'parentId': self.parent_id,
+            'createTime': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'count': children_count  # 使用实际计算的子节点数量
         }

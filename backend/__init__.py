@@ -1,5 +1,4 @@
 from flask import Flask
-from extensions import db
 from routes.maintenance import maintenance_bp
 
 def create_app():
