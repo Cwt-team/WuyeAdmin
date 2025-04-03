@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify, request
-from db import db
+from backend.db import db
 from datetime import datetime
 import logging
-from models.maintenance_request import MaintenanceRequest
-from models.community_info import CommunityInfo
-from models.house import HouseInfo
+from backend.models.maintenance_request import MaintenanceRequest
+from backend.models.community_info import CommunityInfo
+from backend.models.house import HouseInfo
 from sqlalchemy import text
 
 # 配置日志

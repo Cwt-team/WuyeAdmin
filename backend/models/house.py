@@ -1,10 +1,14 @@
-from db import db  # 从自定义的 db 模块中导入 SQLAlchemy 实例，用于数据库操作
+from backend.db import db  # 使用绝对导入
 from datetime import datetime  # 导入 datetime 模块，用于获取当前时间
+from backend.models.community_info import CommunityInfo  # 显式导入CommunityInfo
 
 
 # 定义一个名为 HouseInfo 的数据模型类，继承自 SQLAlchemy 的 db.Model
 class HouseInfo(db.Model):
     __tablename__ = 'house_info'  # 指定数据库中对应的表名为 "house_info"
+
+    # 添加extend_existing=True以解决元数据冲突
+    __table_args__ = {'extend_existing': True}
 
     # 定义字段 id：整型，主键
     id = db.Column(db.Integer, primary_key=True)
@@ -38,7 +42,7 @@ class HouseInfo(db.Model):
 
     # 关联关系：关联 CommunityInfo 模型，表示当前房屋所属的社区
     # backref='houses' 意味着在 CommunityInfo 对象上可以通过 houses 属性访问该社区下的所有房屋信息
-    community = db.relationship('CommunityInfo', backref='houses')
+    community = db.relationship('CommunityInfo', backref=db.backref('houses', lazy='dynamic'))
 
     # 自引用关联关系：关联同一模型 HouseInfo，用于表示父子房屋关系
     # remote_side=[id] 指定外键关联的目标字段为当前表的 id

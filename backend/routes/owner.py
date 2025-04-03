@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
-from models.owner import OwnerInfo, OwnerPermission
-from db import db
+from backend.models.owner import OwnerInfo
+from backend.models import HouseInfo
+from backend.db import db
 from datetime import datetime
 
 owner_bp = Blueprint('owner', __name__)

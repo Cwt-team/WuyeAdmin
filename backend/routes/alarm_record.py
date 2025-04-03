@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
-from models.alarm_record import AlarmRecord
-from models.house import HouseInfo
-from db import db
+from backend.models.alarm_record import AlarmRecord
+from backend.models import HouseInfo
+from backend.db import db
 from datetime import datetime
 
 alarm_record_bp = Blueprint('alarm_record', __name__)

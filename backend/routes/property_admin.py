@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from models.property_admin import PropertyAdmin
-from db import db
+from backend.models.property_admin import PropertyAdmin
+from backend.db import db
 
 property_admin_bp = Blueprint('property_admin', __name__)
 

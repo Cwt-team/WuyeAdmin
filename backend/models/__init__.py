@@ -1,9 +1,6 @@
-from models.community_info import CommunityInfo
-from models.house import HouseInfo
-from models.owner import OwnerInfo
-# 其他模型导入...
+from backend.models.community_info import CommunityInfo
+from backend.models.house import HouseInfo
+from backend.models.personal_info import PersonalInfo
+from backend.models.owner import OwnerInfo
 
-# 这样其他文件只需要从models导入即可
-# from models import CommunityInfo, HouseInfo 
-
-__all__ = ['HouseInfo', 'CommunityInfo', 'OwnerInfo'] 
+__all__ = ['CommunityInfo', 'HouseInfo', 'PersonalInfo', 'OwnerInfo']

@@ -1,5 +1,7 @@
 from flask import Blueprint, jsonify, request
-from backend.models import HouseInfo, CommunityInfo, OwnerInfo
+from backend.models.house import HouseInfo
+from backend.models.community_info import CommunityInfo
+from backend.models.owner import OwnerInfo
 from backend.db import db
 
 house_bp = Blueprint('house', __name__)
@@ -83,14 +85,27 @@ def add_house():
     try:
         data = request.json
         
+        # 获取父级房屋信息，用于构建完整名称
+        parent_house = None
+        if data.get('parentId'):
+            parent_house = HouseInfo.query.get(data['parentId'])
+            
+        # 构建完整名称
+        full_name = ''
+        if parent_house:
+            # 移除父级房屋名称中的最后一个数字和单位（如"室"、"单元"等）
+            parent_name_parts = parent_house.house_full_name.split('单元')[0]
+            full_name = f"{parent_name_parts}单元{data['roomNumber']}室"
+        
         new_house = HouseInfo(
             community_id=data['communityId'],
+            parent_id=data.get('parentId'),
             district_number=data.get('districtNumber'),
             building_number=data.get('buildingNumber'),
             unit_number=data.get('unitNumber'),
-            house_full_name=data['fullName'],
-            house_level=data['level'],
-            parent_id=data.get('parentId')
+            room_number=data.get('roomNumber'),
+            house_full_name=full_name or data['fullName'],
+            house_level=data['level']
         )
         
         db.session.add(new_house)
@@ -103,7 +118,11 @@ def add_house():
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        print(f"添加房屋失败: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @house_bp.route('/api/houses/<int:id>', methods=['PUT'])
 def update_house(id):
@@ -148,24 +167,42 @@ def delete_house(id):
     try:
         house = HouseInfo.query.get(id)
         if not house:
-            return jsonify({'error': '房屋不存在'}), 404
+            return jsonify({
+                'success': False,
+                'error': '房屋不存在'
+            }), 404
             
         # 检查是否有子节点
-        if house.children:
-            return jsonify({'error': '该节点下还有子节点，无法删除'}), 400
+        children = HouseInfo.query.filter_by(parent_id=id).first()
+        if children:
+            return jsonify({
+                'success': False,
+                'error': '该节点下还有子节点，请先删除子节点'
+            }), 400
         
         # 检查是否有关联的业主
-        owners = OwnerInfo.query.filter_by(house_id=id).all()
+        owners = OwnerInfo.query.filter_by(house_id=id).first()
         if owners:
-            return jsonify({'error': f'该房屋下有{len(owners)}个关联业主，请先移除业主关联后再删除'}), 400
+            return jsonify({
+                'success': False,
+                'error': '该房屋下有关联业主，请先解除关联'
+            }), 400
             
         db.session.delete(house)
         db.session.commit()
-        return jsonify({'success': True})
+        
+        return jsonify({
+            'success': True,
+            'message': '删除成功'
+        })
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        print(f"删除房屋失败: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @house_bp.route('/api/houses/tree/<int:community_id>', methods=['GET'])
 def get_house_tree(community_id):

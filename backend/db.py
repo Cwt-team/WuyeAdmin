@@ -7,11 +7,6 @@ db = SQLAlchemy()
 
 def init_db(app):
     """初始化数据库"""
-    # 配置数据库
-    app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:123456@localhost:3326/wuye"
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SQLALCHEMY_ECHO'] = False  # 输出SQL语句，方便调试
-    
     # 初始化 SQLAlchemy
     db.init_app(app)
     
@@ -28,12 +23,12 @@ def test_db_models():
     """测试数据库模型"""
     try:
         # 测试查询community_info表
-        from models import CommunityInfo
+        from backend.models import CommunityInfo
         communities = CommunityInfo.query.all()
         print(f"成功查询到{len(communities)}个小区信息")
         
         # 测试查询admin_role表
-        from models import AdminRole
+        from backend.models import AdminRole
         roles = AdminRole.query.all()
         print(f"成功查询到{len(roles)}个管理员角色")
         

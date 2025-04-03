@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
-from models.complaint import Complaint
-from models.community_info import CommunityInfo
-from db import db
+from backend.models.complaint import Complaint
+from backend.models.community_info import CommunityInfo
+from backend.db import db
 from sqlalchemy import text
 from datetime import datetime
 import logging

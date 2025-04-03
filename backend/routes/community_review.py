@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 from sqlalchemy import desc
-from models.area_maintenance import CommunityReview
-from models.community_info import CommunityInfo
-from models.personal_info import PersonalInfo
-from db import db
+from backend.models.area_maintenance import CommunityReview
+from backend.models.community_info import CommunityInfo
+from backend.models.personal_info import PersonalInfo
+from backend.db import db
 from sqlalchemy.sql import text
 import logging
 

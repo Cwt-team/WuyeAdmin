@@ -1,9 +1,9 @@
-from app import app
-from db import db
-from models.community_info import CommunityInfo
-from models.district_info import DistrictInfo
-from models.building_info import BuildingInfo
-from models.unit_info import UnitInfo
+from backend.app import app
+from backend.db import db
+from backend.models.community_info import CommunityInfo
+from backend.models.district_info import DistrictInfo
+from backend.models.building_info import BuildingInfo
+from backend.models.unit_info import UnitInfo
 from datetime import datetime
 
 def insert_test_data():

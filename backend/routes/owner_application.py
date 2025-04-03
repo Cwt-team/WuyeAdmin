@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from models.owner_application import OwnerApplication
-from models.house import HouseInfo
+from backend.models import HouseInfo
 from db import db
 from datetime import datetime
 

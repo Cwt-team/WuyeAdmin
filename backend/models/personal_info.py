@@ -1,9 +1,11 @@
-from db import db
+from backend.db import db
 from datetime import datetime
 
 class PersonalInfo(db.Model):
     """用户个人信息模型（对应个人基础信息表）"""
     __tablename__ = 'personal_info' # 数据库表名
+    
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)                                 #主键ID
     account_number = db.Column(db.String(50), unique=True, nullable=False)                              #登录账号（唯一标识）

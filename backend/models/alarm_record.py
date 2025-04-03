@@ -1,6 +1,6 @@
-from db import db
+from backend.db import db
 from datetime import datetime
-from models.house import HouseInfo  # 导入房屋信息模型用于关联关系
+from backend.models.house import HouseInfo  # 改为使用完整的导入路径
 
 
 # 报警记录模型类（对应数据库alarm_record表）

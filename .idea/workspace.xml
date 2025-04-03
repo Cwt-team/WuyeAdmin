@@ -4,11 +4,41 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2150e5b-21bc-481a-bfc4-6aa35e4c4578" name="更改" comment="v0.1.5 修改了报事报修的社区查询问题（新增单元选择，楼栋、房间号有bug，）">
+    <list default="true" id="d2150e5b-21bc-481a-bfc4-6aa35e4c4578" name="更改" comment="4.1 完善社区信息列表查询过滤功能；去除社区&amp;房屋重复的后端逻辑以及关联；完善房屋信息列表前后端（遗留：删除和房间号修改）">
+      <change beforePath="$PROJECT_DIR$/.idea/WuyeAdmin.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/WuyeAdmin.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/models/maintenance_request.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/maintenance_request.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/db.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/models/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/models/alarm_record.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/alarm_record.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/models/area_maintenance.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/area_maintenance.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/models/building_info.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/models/community_info.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/community_info.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/models/district.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/models/district_info.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/models/house.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/house.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/models/owner.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/owner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/models/personal_info.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/personal_info.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/models/unit_info.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/models/user.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routes/alarm_record.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/alarm_record.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routes/area_maintenance.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routes/community.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/community.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routes/community_review.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/community_review.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routes/complaint.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/complaint.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routes/debug.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/debug.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routes/house.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/house.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/routes/maintenance.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/maintenance.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/MaintenanceRequests.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/MaintenanceRequests.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routes/owner.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/owner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routes/owner_application.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/owner_application.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routes/personal_info.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/personal_info.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routes/property_admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/property_admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/scripts/insert_test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/scripts/insert_test_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/HouseInfoList.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/HouseInfoList.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,6 +59,7 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -39,9 +70,12 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/Cwt-team/WuyeAdmin.git&quot;,
-    &quot;accountId&quot;: &quot;4f7b7dda-3f45-44eb-b210-5a42bf5e43f7&quot;
+    &quot;accountId&quot;: &quot;1192c2e0-fcc6-4868-a56d-25f4aea95aeb&quot;
   }
 }</component>
+  <component name="PackageJsonUpdateNotifier">
+    <dismissed value="$PROJECT_DIR$/package.json" />
+  </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -53,21 +87,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python 测试.Python 测试 (udp_server.py 内).executor&quot;: &quot;Run&quot;,
-    &quot;Python.app.executor&quot;: &quot;Run&quot;,
-    &quot;Python.device.executor&quot;: &quot;Run&quot;,
-    &quot;Python.device_monitor.executor&quot;: &quot;Run&quot;,
-    &quot;Python.udp_server.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;3.18__shujuku&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Wuye_all/wuye_xiaochengxu&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.grazie&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python 测试.Python 测试 (udp_server.py 内).executor": "Run",
+    "Python 测试.test_db.test_db_connection 的 Python 测试.executor": "Run",
+    "Python.app.executor": "Run",
+    "Python.device.executor": "Run",
+    "Python.device_monitor.executor": "Run",
+    "Python.udp_server.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "repair3.14",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "F:/Wuye/WuyeAdmin1",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.grazie",
+    "ts.external.directory.path": "E:\\environment2\\PyCharm 2024.2.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Python.app">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="WuyeAdmin" />
@@ -177,8 +218,25 @@
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
+    <configuration name="test_db.test_db_connection 的 Python 测试" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="WuyeAdmin" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_db.test_db_connection&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python 测试.test_db.test_db_connection 的 Python 测试" />
         <item itemvalue="Python.device_monitor" />
         <item itemvalue="Python.udp_server" />
         <item itemvalue="Python.device" />
@@ -189,7 +247,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-495700d161d3-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.22562.220" />
+        <option value="bundled-js-predefined-d6986cc7102b-7c0b70fcd90d-JavaScript-PY-242.21829.153" />
+        <option value="bundled-python-sdk-464836ebc622-b74155a9e76b-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-242.21829.153" />
       </set>
     </attachedChunks>
   </component>
@@ -201,6 +260,14 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1736480753905</updated>
+      <workItem from="1743386040886" duration="6215000" />
+      <workItem from="1743399187839" duration="4291000" />
+      <workItem from="1743474660614" duration="6216000" />
+      <workItem from="1743495095963" duration="3499000" />
+      <workItem from="1743556845309" duration="39000" />
+      <workItem from="1743562932277" duration="4244000" />
+      <workItem from="1743643142779" duration="1459000" />
+      <workItem from="1743645046432" duration="2487000" />
     </task>
     <task id="LOCAL-00001" summary="v0.0.1 硬件UDP通信端口（demo）">
       <option name="closed" value="true" />
@@ -234,8 +301,27 @@
       <option name="project" value="LOCAL" />
       <updated>1742298914936</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="3.30 完善社区评价页面前后端以及按钮细节；完善投诉建议页面前后端（按钮细节未完善） v2">
+      <option name="closed" value="true" />
+      <created>1743327432040</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1743327432040</updated>
+    </task>
+    <task id="LOCAL-00006" summary="4.1 完善社区信息列表查询过滤功能；去除社区&amp;房屋重复的后端逻辑以及关联；完善房屋信息列表前后端（遗留：删除和房间号修改）">
+      <option name="closed" value="true" />
+      <created>1743497108251</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1743497108251</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="RECENT_FILTERS">
@@ -243,6 +329,16 @@
         <entry key="Branch">
           <value>
             <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="origin/3.14_报事报修" />
+                </option>
+              </RecentGroup>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="repair3.14" />
+                </option>
+              </RecentGroup>
               <RecentGroup>
                 <option name="FILTER_VALUES">
                   <option value="HEAD" />
@@ -256,11 +352,6 @@
               <RecentGroup>
                 <option name="FILTER_VALUES">
                   <option value="origin/main" />
-                </option>
-              </RecentGroup>
-              <RecentGroup>
-                <option name="FILTER_VALUES">
-                  <option value="origin/3.14_报事报修" />
                 </option>
               </RecentGroup>
             </list>
@@ -295,6 +386,13 @@
     <MESSAGE value="v0.1.1 新增了区域维护管理板块（报事报修、社区评价、投诉建议）内容为完成" />
     <MESSAGE value="v0.1.4 修改了报事报修的社区查询问题（楼栋有bug、房间号待定）" />
     <MESSAGE value="v0.1.5 修改了报事报修的社区查询问题（新增单元选择，楼栋、房间号有bug，）" />
-    <option name="LAST_COMMIT_MESSAGE" value="v0.1.5 修改了报事报修的社区查询问题（新增单元选择，楼栋、房间号有bug，）" />
+    <MESSAGE value="3.30 完善社区评价页面前后端以及按钮细节；完善投诉建议页面前后端（按钮细节未完善） v2" />
+    <MESSAGE value="4.1 完善社区信息列表查询过滤功能；去除社区&amp;房屋重复的后端逻辑以及关联；完善房屋信息列表前后端（遗留：删除和房间号修改）" />
+    <option name="LAST_COMMIT_MESSAGE" value="4.1 完善社区信息列表查询过滤功能；去除社区&amp;房屋重复的后端逻辑以及关联；完善房屋信息列表前后端（遗留：删除和房间号修改）" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/WuyeAdmin$app.coverage" NAME="app 覆盖结果" MODIFIED="1743643146655" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend" />
+    <SUITE FILE_PATH="coverage/WuyeAdmin1$app.coverage" NAME="app 覆盖结果" MODIFIED="1743648717512" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend" />
+    <SUITE FILE_PATH="coverage/WuyeAdmin$.coverage" NAME=" 覆盖结果" MODIFIED="1743565705797" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend" />
   </component>
 </project>

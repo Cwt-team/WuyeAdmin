@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify
-from models.community_info import CommunityInfo
-from models.district_info import DistrictInfo
-from models.building_info import BuildingInfo
-from models.unit_info import UnitInfo
+from backend.models.community_info import CommunityInfo
+from backend.models.district_info import DistrictInfo
+from backend.models.building_info import BuildingInfo
+from backend.models.unit_info import UnitInfo
 import logging
 
 # 配置日志

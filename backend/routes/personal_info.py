@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, session, send_from_directory
-from models.personal_info import PersonalInfo
-from db import db
+from backend.models.personal_info import PersonalInfo
+from backend.db import db
 from datetime import datetime
 import os
 from werkzeug.utils import secure_filename

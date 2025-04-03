@@ -1,9 +1,13 @@
-from db import db
+from backend.db import db
 from datetime import datetime
+from backend.models import HouseInfo
+from backend.models.community_info import CommunityInfo
 
 class OwnerInfo(db.Model):
     """业主信息表"""
     __tablename__ = 'owner_info'
+    
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.BigInteger, primary_key=True, comment='业主ID')
     community_id = db.Column(db.Integer, db.ForeignKey('community_info.id'), nullable=False)
@@ -47,6 +51,8 @@ class OwnerInfo(db.Model):
 class OwnerPermission(db.Model):
     """业主权限表"""
     __tablename__ = 'owner_permission'
+    
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.BigInteger, primary_key=True, comment='权限ID')
     owner_id = db.Column(db.BigInteger, db.ForeignKey('owner_info.id'), nullable=False)
