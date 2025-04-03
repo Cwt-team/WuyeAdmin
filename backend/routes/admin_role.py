@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from models.admin_role import AdminRole
-from db import db
+from backend.models.admin_role import AdminRole
+from backend.db import db
 
 admin_role_bp = Blueprint('admin_role', __name__)
 

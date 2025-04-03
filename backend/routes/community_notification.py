@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from models.community_notification import CommunityNotification
-from db import db
+from backend.models.community_notification import CommunityNotification
+from backend.db import db
 from datetime import datetime
 
 community_notification_bp = Blueprint('community_notification', __name__)

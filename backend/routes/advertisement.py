@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from models.advertisement import Advertisement
-from db import db
+from backend.models.advertisement import Advertisement
+from backend.db import db
 import os
 from werkzeug.utils import secure_filename
 from datetime import datetime

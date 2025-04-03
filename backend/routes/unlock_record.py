@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from models.unlock_record import UnlockRecord
-from db import db
+from backend.models.unlock_record import UnlockRecord
+from backend.db import db
 from datetime import datetime
 
 unlock_record_bp = Blueprint('unlock_record', __name__)

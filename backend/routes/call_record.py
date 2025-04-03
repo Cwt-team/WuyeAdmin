@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from models.call_record import CallRecord
-from db import db
+from backend.models.call_record import CallRecord
+from backend.db import db
 from datetime import datetime
 
 call_record_bp = Blueprint('call_record', __name__)

@@ -1,5 +1,6 @@
-from db import db
+from backend.db import db
 from datetime import datetime
+from backend.models import *
 
 class OwnerApplication(db.Model):
     __tablename__ = 'owner_application'

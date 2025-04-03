@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from models.community_admin import CommunityAdmin
-from db import db
+from backend.models.community_admin import CommunityAdmin
+from backend.db import db
 
 community_admin_bp = Blueprint('community_admin', __name__)
 

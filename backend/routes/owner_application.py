@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
-from models.owner_application import OwnerApplication
+from backend.models.owner_application import OwnerApplication
 from backend.models import HouseInfo
-from db import db
+from backend.db import db
 from datetime import datetime
 
 owner_application_bp = Blueprint('owner_application', __name__)

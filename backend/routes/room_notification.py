@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from models.room_notification import RoomNotification
-from db import db
+from backend.models.room_notification import RoomNotification
+from backend.db import db
 from datetime import datetime
 
 room_notification_bp = Blueprint('room_notification', __name__)
