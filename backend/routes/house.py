@@ -85,17 +85,84 @@ def add_house():
     try:
         data = request.json
         
-        # 获取父级房屋信息，用于构建完整名称
+        # 验证必要字段
+        required_fields = ['communityId', 'level']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({
+                    'success': False,
+                    'error': f'缺少必要字段: {field}'
+                }), 400
+        
+        # 获取父级房屋信息
         parent_house = None
         if data.get('parentId'):
             parent_house = HouseInfo.query.get(data['parentId'])
-            
+            if parent_house:
+                # 智能继承父级房屋的区号、楼栋号、单元号信息
+                if not data.get('districtNumber') and parent_house.district_number:
+                    data['districtNumber'] = parent_house.district_number
+                    print(f"从父节点继承区号: {data['districtNumber']}")
+                    
+                if not data.get('buildingNumber') and parent_house.building_number:
+                    data['buildingNumber'] = parent_house.building_number
+                    print(f"从父节点继承楼栋号: {data['buildingNumber']}")
+                    
+                if not data.get('unitNumber') and parent_house.unit_number:
+                    data['unitNumber'] = parent_house.unit_number
+                    print(f"从父节点继承单元号: {data['unitNumber']}")
+        
+        # 根据房屋级别验证必要字段
+        level = data['level']
+        if level == 1:  # 区级
+            if not data.get('districtNumber'):
+                return jsonify({
+                    'success': False,
+                    'error': '区级房屋必须提供区号'
+                }), 400
+        elif level == 2:  # 楼栋级
+            if not data.get('districtNumber') or not data.get('buildingNumber'):
+                return jsonify({
+                    'success': False,
+                    'error': '楼栋级房屋必须提供区号和楼栋号'
+                }), 400
+        elif level == 3:  # 单元级
+            if not data.get('districtNumber') or not data.get('buildingNumber') or not data.get('unitNumber'):
+                return jsonify({
+                    'success': False,
+                    'error': '单元级房屋必须提供区号、楼栋号和单元号'
+                }), 400
+        elif level == 4:  # 房间级
+            if not data.get('districtNumber') or not data.get('buildingNumber') or not data.get('unitNumber') or not data.get('roomNumber'):
+                return jsonify({
+                    'success': False,
+                    'error': '房间级房屋必须提供区号、楼栋号、单元号和房间号'
+                }), 400
+        
         # 构建完整名称
         full_name = ''
-        if parent_house:
-            # 移除父级房屋名称中的最后一个数字和单位（如"室"、"单元"等）
+        if parent_house and level == 4:  # 只有房间级才需要特殊处理
             parent_name_parts = parent_house.house_full_name.split('单元')[0]
             full_name = f"{parent_name_parts}单元{data['roomNumber']}室"
+        elif not data.get('fullName'):
+            # 根据级别构建默认的完整名称
+            community_name = ''
+            try:
+                from backend.models.community_info import CommunityInfo
+                community = CommunityInfo.query.get(data['communityId'])
+                if community:
+                    community_name = community.community_name
+            except Exception as e:
+                print(f"获取社区名称失败: {str(e)}")
+            
+            if level == 1:
+                full_name = f"{community_name}{data['districtNumber']}区"
+            elif level == 2:
+                full_name = f"{community_name}{data['districtNumber']}区{data['buildingNumber']}栋"
+            elif level == 3:
+                full_name = f"{community_name}{data['districtNumber']}区{data['buildingNumber']}栋{data['unitNumber']}单元"
+            elif level == 4:
+                full_name = f"{community_name}{data['districtNumber']}区{data['buildingNumber']}栋{data['unitNumber']}单元{data['roomNumber']}室"
         
         new_house = HouseInfo(
             community_id=data['communityId'],
@@ -104,8 +171,8 @@ def add_house():
             building_number=data.get('buildingNumber'),
             unit_number=data.get('unitNumber'),
             room_number=data.get('roomNumber'),
-            house_full_name=full_name or data['fullName'],
-            house_level=data['level']
+            house_full_name=full_name or data.get('fullName', ''),
+            house_level=level
         )
         
         db.session.add(new_house)
