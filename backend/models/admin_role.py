@@ -5,7 +5,7 @@ class AdminRole(db.Model):
     """管理员角色表"""
     __tablename__ = 'admin_role'
     
-    id = db.Column(db.BigInteger, primary_key=True, comment='角色标识ID')
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True, comment='角色标识ID')
     role_name = db.Column(db.String(50), nullable=False, unique=True, comment='角色名称')
     sort_number = db.Column(db.Integer, nullable=False, comment='排序编号')
     description = db.Column(db.String(200), comment='角色描述')

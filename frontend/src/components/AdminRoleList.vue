@@ -141,6 +141,7 @@ export default {
       deleteDialogVisible: false,
       dialogTitle: '添加角色',
       roleForm: {
+        id: '',
         name: '',
         sortNo: '',
         description: ''
@@ -183,6 +184,7 @@ export default {
     handleAdd() {
       this.dialogTitle = '添加角色'
       this.roleForm = {
+        id: '',
         name: '',
         sortNo: '',
         description: ''
@@ -193,6 +195,7 @@ export default {
     handleEdit(row) {
       this.dialogTitle = '编辑角色'
       this.roleForm = {
+        id: row.id,
         name: row.name,
         sortNo: row.sortNo,
         description: row.description
@@ -207,7 +210,7 @@ export default {
 
     handlePermissions(row) {
       // 权限管理逻辑
-      console.log('管理权限:', row)
+      this.$message.info('权限管理功能正在开发中，角色ID: ' + row.id)
     },
 
     async submitRole() {
@@ -226,7 +229,7 @@ export default {
         }
       } catch (error) {
         console.error('保存角色失败:', error);
-        this.$message.error('保存角色失败');
+        this.$message.error(error.response?.data?.message || '保存角色失败');
       }
     },
 
@@ -242,17 +245,29 @@ export default {
         }
       } catch (error) {
         console.error('删除角色失败:', error);
-        this.$message.error('删除角色失败');
+        this.$message.error(error.response?.data?.message || '删除角色失败');
       }
     },
 
     handlePageChange(page) {
       this.currentPage = page
       this.fetchRoles()
+    },
+    
+    // 添加搜索方法
+    handleSearch() {
+      this.currentPage = 1
+      this.fetchRoles()
     }
   },
   mounted() {
     this.fetchRoles()
+  },
+  watch: {
+    // 监听搜索框变化，自动触发搜索
+    search() {
+      this.handleSearch()
+    }
   }
 }
 </script>
