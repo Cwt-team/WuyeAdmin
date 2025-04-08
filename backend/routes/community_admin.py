@@ -1,6 +1,12 @@
 from flask import Blueprint, jsonify, request
 from backend.models.community_admin import CommunityAdmin
 from backend.db import db
+from sqlalchemy import text
+from datetime import datetime
+
+# 导入CommunityInfo和AdminRole模型
+from backend.models.community_info import CommunityInfo
+from backend.models.admin_role import AdminRole
 
 community_admin_bp = Blueprint('community_admin', __name__)
 
@@ -118,4 +124,64 @@ def delete_admin(admin_id):
         return jsonify({
             'success': False,
             'message': '删除管理员失败'
+        }), 500
+
+@community_admin_bp.route('/api/communities', methods=['GET'])
+def get_admin_communities():
+    try:
+        # 查询社区信息
+        communities = db.session.query(
+            CommunityInfo.id, 
+            CommunityInfo.community_name
+        ).order_by(CommunityInfo.id).all()
+        
+        if not communities:
+            return jsonify({
+                'success': True,
+                'data': {
+                    'list': []
+                }
+            })
+            
+        return jsonify({
+            'success': True,
+            'data': {
+                'list': [{
+                    'id': community.id,
+                    'community_name': community.community_name
+                } for community in communities]
+            }
+        })
+        
+    except Exception as e:
+        print(f"获取社区列表失败: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': '获取社区列表失败'
+        }), 500
+
+@community_admin_bp.route('/api/admin-roles', methods=['GET'])
+def get_admin_roles():
+    try:
+        # 从admin_role表获取角色列表
+        roles = db.session.query(
+            AdminRole.id,
+            AdminRole.role_name.label('name'),
+            AdminRole.sort_number
+        ).order_by(AdminRole.sort_number).all()
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'list': [{
+                    'id': str(role.id),
+                    'name': role.name
+                } for role in roles]
+            }
+        })
+    except Exception as e:
+        print(f"获取角色列表失败: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': '获取角色列表失败'
         }), 500 

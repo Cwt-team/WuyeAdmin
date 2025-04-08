@@ -3,8 +3,13 @@
     <el-card>
       <div class="header-section">
         <div class="left">
-          <el-select v-model="selectedCompany" placeholder="1545惠氏科技" class="company-select">
-            <el-option label="1545惠氏科技" value="1545" />
+          <el-select v-model="selectedCompany" placeholder="请选择小区" class="company-select" @change="fetchAdmins">
+            <el-option 
+              v-for="item in communityOptions" 
+              :key="item.id" 
+              :label="item.community_name" 
+              :value="item.id.toString()" 
+            />
           </el-select>
         </div>
         <div class="right">
@@ -115,7 +120,7 @@ export default {
   name: 'CommunityAdminList',
   data() {
     return {
-      selectedCompany: '1545',
+      selectedCompany: '',
       showAddDialog: false,
       deleteDialogVisible: false,
       deleteAdminData: null, // 存储要删除的管理员信息
@@ -164,6 +169,7 @@ export default {
       pageSize: 10,
       dialogTitle: '添加小区管理员',
       roleOptions: [], // 添加角色选项数组
+      communityOptions: [], // 添加小区选项数组
     };
   },
   methods: {
@@ -237,9 +243,15 @@ export default {
       this.$refs.adminForm.validate(async (valid) => {
         if (valid) {
           try {
+            // 添加communityId字段
+            const adminData = {
+              ...this.adminForm,
+              communityId: parseInt(this.selectedCompany)
+            };
+            
             const url = this.dialogTitle === '添加小区管理员' ? '/api/admins' : `/api/admins/${this.adminForm.id}`;
             const method = this.dialogTitle === '添加小区管理员' ? 'post' : 'put';
-            const response = await axios[method](url, this.adminForm);
+            const response = await axios[method](url, adminData);
             
             if (response.data.success) {
               this.$message.success(response.data.message);
@@ -286,10 +298,35 @@ export default {
         this.$message.error('获取角色列表失败');
       }
     },
+    async fetchCommunities() {
+      try {
+        const response = await axios.get('/api/communities');
+        if (response.data.success) {
+          this.communityOptions = response.data.data.list;
+          if (this.communityOptions.length > 0) {
+            this.selectedCompany = this.communityOptions[0].id.toString();
+            this.fetchAdmins();
+          }
+        } else {
+          throw new Error(response.data.message);
+        }
+      } catch (error) {
+        console.error('获取小区列表失败:', error);
+        this.$message.error('获取小区列表失败');
+        // 使用模拟数据
+        this.communityOptions = [
+          { id: 1, community_name: '阳光花园' },
+          { id: 2, community_name: '翡翠湾' },
+          { id: 3, community_name: '康庄小区' }
+        ];
+        this.selectedCompany = '1';
+      }
+    },
   },
   mounted() {
     this.fetchAdmins();
     this.fetchRoles();
+    this.fetchCommunities();
   },
 };
 </script>

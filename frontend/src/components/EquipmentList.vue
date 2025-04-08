@@ -166,6 +166,18 @@
             >
               检查状态
             </el-button>
+            <el-button 
+              type="success" 
+              size="small" 
+              @click="remoteUnlock(scope.row)">
+              远程开锁
+            </el-button>
+            <el-button 
+              type="info" 
+              size="small" 
+              @click="viewDeviceDetail(scope.row)">
+              查看详情
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -224,6 +236,34 @@
         <span class="dialog-footer">
           <el-button @click="dialogVisible = false">取消</el-button>
           <el-button type="primary" @click="submitEquipmentForm">确定</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- 远程开锁对话框 -->
+    <el-dialog
+      title="远程开锁"
+      v-model="unlockFormVisible"
+      width="30%"
+    >
+      <el-form :model="unlockForm" label-width="100px">
+        <el-form-item label="设备名称">
+          <el-input v-model="unlockForm.deviceName" disabled />
+        </el-form-item>
+        <el-form-item label="单元号" prop="unitId">
+          <el-input v-model="unlockForm.unitId" placeholder="请输入4位单元号，例如0101" />
+        </el-form-item>
+        <el-form-item label="房间号" prop="roomNumber">
+          <el-input v-model="unlockForm.roomNumber" placeholder="请输入4位房间号，例如0304" />
+        </el-form-item>
+        <el-form-item label="手机号" prop="phone">
+          <el-input v-model="unlockForm.phone" placeholder="可选，无则留空" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="unlockFormVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmUnlock">确认开锁</el-button>
         </span>
       </template>
     </el-dialog>
@@ -337,6 +377,16 @@ export default {
         },
       ],
       sampleTotal: 3,
+      unlockFormVisible: false,
+      unlockForm: {
+        deviceId: null,
+        deviceCode: '',
+        communityCode: '',
+        deviceName: '',
+        unitId: '',
+        roomNumber: '',
+        phone: ''
+      }
     };
   },
   computed: {
@@ -657,6 +707,49 @@ export default {
       if (!dateTime) return '';
       const date = new Date(dateTime);
       return date.toLocaleString();
+    },
+    async remoteUnlock(row) {
+      try {
+        this.unlockFormVisible = true;
+        this.unlockForm.deviceId = row.id;
+        this.unlockForm.deviceCode = row.deviceCode;
+        this.unlockForm.communityCode = row.communityCode;
+        this.unlockForm.deviceName = row.equipmentName;
+      } catch (error) {
+        console.error('打开远程开锁对话框失败:', error);
+        this.$message.error('操作失败');
+      }
+    },
+    async confirmUnlock() {
+      try {
+        await this.$confirm(`确定要为设备 "${this.unlockForm.deviceName}" 发送开锁命令吗？`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        });
+        
+        // 发送开锁请求
+        await axios.post(`/api/equipment/${this.unlockForm.deviceId}/remote-unlock`, {
+          unitId: this.unlockForm.unitId,
+          roomNumber: this.unlockForm.roomNumber,
+          phone: this.unlockForm.phone
+        });
+        
+        this.$message.success('开锁命令已发送');
+        this.unlockFormVisible = false;
+        
+      } catch (error) {
+        if (error !== 'cancel') {
+          console.error('远程开锁失败:', error);
+          this.$message.error('远程开锁失败');
+        }
+      }
+    },
+    viewDeviceDetail(row) {
+      this.$router.push({
+        name: 'DeviceDetail',
+        params: { id: row.id }
+      });
     },
   },
   mounted() {

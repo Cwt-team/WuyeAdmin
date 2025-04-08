@@ -77,9 +77,24 @@
             {{ getDeviceTypeText(scope.row.deviceType) }}
           </template>
         </el-table-column>
-        <el-table-column prop="unlockingType" label="开锁类型"/>
+        <el-table-column prop="unlockingType" label="开锁类型">
+          <template #default="scope">
+            {{ getUnlockTypeText(scope.row.unlockingType) }}
+          </template>
+        </el-table-column>
         <el-table-column prop="unlocker" label="开锁人员"/>
         <el-table-column prop="unlockingTime" label="开锁时间"/>
+        <el-table-column label="开锁照片">
+          <template #default="scope">
+            <el-image 
+              v-if="scope.row.photoUrl" 
+              :src="scope.row.photoUrl" 
+              :preview-src-list="[scope.row.photoUrl]"
+              style="width: 50px; height: 50px;"
+            />
+            <span v-else>无照片</span>
+          </template>
+        </el-table-column>
       </el-table>
 
       <div class="pagination-container">
@@ -148,6 +163,21 @@ export default {
         'Other': '其他'
       }
       return types[type] || type
+    },
+    getUnlockTypeText(type) {
+      const typeMap = {
+        '0': '二维码开锁',
+        '1': '小程序远程开锁',
+        '2': '门禁卡开锁',
+        '3': '一次性密码开锁',
+        '4': '人脸识别开锁',
+        '5': '分机开锁',
+        '6': '物业中心开锁',
+        '7': '指纹开锁',
+        '8': '公共密码开锁',
+        '14': '手机电话开锁'
+      };
+      return typeMap[type] || type;
     },
     async fetchUnlockRecords() {
       this.loading = true

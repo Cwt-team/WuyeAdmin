@@ -28,6 +28,24 @@ const routes = [
     path: '/area-maintenance',
     name: 'AreaMaintenance',
     component: AreaMaintenance
+  },
+  {
+    path: '/device-detail/:id',
+    name: 'DeviceDetail',
+    component: () => import('../components/DeviceDetail.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/device-config/:id',
+    name: 'DeviceConfig',
+    component: () => import('../components/DeviceConfig.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/device-heartbeats',
+    name: 'DeviceHeartbeats',
+    component: () => import('../components/DeviceHeartbeats.vue'),
+    meta: { requiresAuth: true }
   }
 ]
 

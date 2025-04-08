@@ -127,6 +127,7 @@ export default {
           children: [
             { id: 1, name: '设备列表', component: 'EquipmentList' },
             { id: 2, name: '门禁卡列表', component: 'AccessCardList' },
+            { id: 3, name: '设备心跳记录', component: 'DeviceHeartbeats' },
           ],
         },
         {
