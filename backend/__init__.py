@@ -35,6 +35,7 @@ def create_app():
     from backend.routes.community_admin import community_admin_bp
     from backend.routes.property_admin import property_admin_bp
     from backend.routes.owner import owner_bp
+    from backend.models.owner import OwnerInfo
     from backend.routes.owner_application import owner_application_bp
     from backend.routes.room_notification import room_notification_bp
     from backend.routes.community_notification import community_notification_bp
@@ -94,7 +95,7 @@ def create_app():
         session.pop('username', None)
         return jsonify({'message': '已成功退出登录'})
 
-    # 修改后的登录的API
+    # 原有网页管理员登录API保持不变
     @app.route('/api/login', methods=['POST'])
     def login():
         data = request.json
@@ -113,6 +114,43 @@ def create_app():
             return jsonify({'success': True, 'message': '登录成功'})
         
         return jsonify({'success': False, 'message': '用户名或密码错误'})
+
+    # 修改移动端登录的路由路径为 /api/mobile/login
+    @app.route('/api/mobile/login', methods=['POST'])
+    def mobile_login():
+        data = request.form
+        username = data.get('username')
+        password = data.get('password')
+        
+        try:
+            # 验证账号密码
+            owner = db.session.query(OwnerInfo).filter_by(account=username, password=password).first()
+            
+            if owner:
+                # 成功找到用户
+                return jsonify({
+                    'success': True,
+                    'message': '登录成功',
+                    'ownerInfo': {
+                        'id': owner.id,
+                        'name': owner.name,
+                        'phoneNumber': owner.phone_number,
+                        'account': owner.account
+                    }
+                })
+            else:
+                # 未找到用户
+                return jsonify({
+                    'success': False,
+                    'message': '账号或密码错误'
+                })
+        except Exception as e:
+            # 记录错误
+            app.logger.error(f"移动端登录失败: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': f'登录失败: {str(e)}'
+            })
 
     @app.route('/api/owners/export-template', methods=['GET'])
     def export_owner_template():
@@ -245,44 +283,6 @@ def create_app():
         upload_folder = os.path.join(app.root_path, 'static', 'uploads', 'avatars')
         os.makedirs(upload_folder, exist_ok=True)
         return send_from_directory(upload_folder, filename)
-
-    # 在现有API接口基础上添加移动端需要的接口
-    @app.route('/api/login', methods=['POST'])
-    def mobile_login():
-        data = request.form
-        username = data.get('username')
-        password = data.get('password')
-        
-        try:
-            # 验证账号密码
-            owner = db.session.query(OwnerInfo).filter_by(account=username, password=password).first()
-            
-            if owner:
-                # 成功找到用户
-                return jsonify({
-                    'success': True,
-                    'message': '登录成功',
-                    'ownerInfo': {
-                        'id': owner.id,
-                        'name': owner.name,
-                        'phoneNumber': owner.phone_number,
-                        'account': owner.account
-                        # 其他需要返回的字段
-                    }
-                })
-            else:
-                # 未找到用户
-                return jsonify({
-                    'success': False,
-                    'message': '账号或密码错误'
-                })
-        except Exception as e:
-            # 记录错误
-            app.logger.error(f"登录失败: {str(e)}")
-            return jsonify({
-                'success': False,
-                'message': f'登录失败: {str(e)}'
-            })
 
     # 添加获取业主信息的API接口
     @app.route('/api/owners/<phone>', methods=['GET'])
