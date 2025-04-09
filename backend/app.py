@@ -13,4 +13,4 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
 if __name__ == '__main__':
     logger.info("Flask应用启动")
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

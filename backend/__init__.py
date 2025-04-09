@@ -246,6 +246,68 @@ def create_app():
         os.makedirs(upload_folder, exist_ok=True)
         return send_from_directory(upload_folder, filename)
 
+    # 在现有API接口基础上添加移动端需要的接口
+    @app.route('/api/login', methods=['POST'])
+    def mobile_login():
+        data = request.form
+        username = data.get('username')
+        password = data.get('password')
+        
+        try:
+            # 验证账号密码
+            owner = db.session.query(OwnerInfo).filter_by(account=username, password=password).first()
+            
+            if owner:
+                # 成功找到用户
+                return jsonify({
+                    'success': True,
+                    'message': '登录成功',
+                    'ownerInfo': {
+                        'id': owner.id,
+                        'name': owner.name,
+                        'phoneNumber': owner.phone_number,
+                        'account': owner.account
+                        # 其他需要返回的字段
+                    }
+                })
+            else:
+                # 未找到用户
+                return jsonify({
+                    'success': False,
+                    'message': '账号或密码错误'
+                })
+        except Exception as e:
+            # 记录错误
+            app.logger.error(f"登录失败: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': f'登录失败: {str(e)}'
+            })
+
+    # 添加获取业主信息的API接口
+    @app.route('/api/owners/<phone>', methods=['GET'])
+    def get_owner_by_phone(phone):
+        try:
+            owner = db.session.query(OwnerInfo).filter_by(phone_number=phone).first()
+            
+            if owner:
+                return jsonify({
+                    'id': owner.id,
+                    'name': owner.name,
+                    'phoneNumber': owner.phone_number,
+                    'account': owner.account
+                    # 其他需要返回的字段
+                })
+            else:
+                return jsonify({'error': '业主不存在'}), 404
+        except Exception as e:
+            app.logger.error(f"获取业主信息失败: {str(e)}")
+            return jsonify({'error': f'获取业主信息失败: {str(e)}'}), 500
+
+    @app.route('/api/ping', methods=['GET'])
+    def ping():
+        return '', 200  # 返回空响应，状态码 200
+
     return app
 
 # 创建应用实例
