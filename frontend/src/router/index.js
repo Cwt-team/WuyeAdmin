@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import UserLogin from '../components/UserLogin.vue'
-import DashboardView from '../components/Dashboard.vue'
+import Dashboard from '@/components/Dashboard.vue'
 import HomeView from '../views/HomeView.vue'
 import AreaMaintenance from '../views/AreaMaintenance.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
   { path: '/login', name: 'UserLogin', component: UserLogin },
-  { path: '/dashboard', name: 'DashboardView', component: DashboardView, meta: { requiresAuth: true } },
+  { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true } },
   {
     path: '/property-admins',
     name: 'PropertyAdminList',
