@@ -1,5 +1,5 @@
 # 从 db 模块中导入 SQLAlchemy 实例 db，用于定义数据模型
-from db import db
+from backend.db import db
 # 导入 datetime 模块中的 datetime 类，用于设置默认的日期和时间
 from datetime import datetime
 
