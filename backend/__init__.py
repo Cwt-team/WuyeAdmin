@@ -343,7 +343,11 @@ def create_app():
                 },
                 'houseInfo': {
                     'id': house.id,
-                    'fullName': house.house_full_name
+                    'fullName': house.house_full_name,
+                    'districtNumber': house.district_number,
+                    'buildingNumber': house.building_number,
+                    'unitNumber': house.unit_number,
+                    'roomNumber': house.room_number
                 }
             }
             
