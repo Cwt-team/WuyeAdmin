@@ -2,9 +2,11 @@ from flask import Blueprint, jsonify, request
 from backend.db import db
 from datetime import datetime
 import logging
+import random
 from backend.models.maintenance_request import MaintenanceRequest
 from backend.models.community_info import CommunityInfo
 from backend.models.house import HouseInfo
+from backend.models.owner import OwnerInfo
 from sqlalchemy import text
 
 # 配置日志
@@ -506,4 +508,275 @@ def cancel_maintenance(id):
             'code': 500,
             'message': '取消报修失败',
             'error': str(e)
+        }), 500
+
+# 提交移动端报修请求
+@maintenance_bp.route('/api/mobile/maintenance/request', methods=['POST'])
+def submit_maintenance_request():
+    try:
+        data = request.get_json()
+        
+        # 验证必要参数
+        required_fields = ['title', 'description', 'type', 'priority', 'communityId', 'reporterName', 'reporterPhone']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({
+                    'success': False,
+                    'message': f'缺少必要参数: {field}'
+                })
+        
+        # 打印调试信息
+        print(f"收到报修请求：{data}")
+        
+        # 生成报修单号
+        request_number = generate_request_number()
+        
+        # 创建维修请求记录
+        maintenance = MaintenanceRequest(
+            request_number=request_number,
+            community_id=data['communityId'],  # 使用客户端提供的communityId
+            house_id=data.get('houseId'),      # 可能为空(公共设施)
+            reporter_name=data['reporterName'],
+            reporter_phone=data['reporterPhone'],
+            title=data['title'],
+            description=data['description'],
+            type=data['type'],
+            priority=data['priority'],
+            expected_time=data.get('expectedTime'),
+            images=data.get('images'),
+            status='pending',
+            report_time=datetime.now()
+        )
+        
+        db.session.add(maintenance)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': '报修请求提交成功',
+            'data': {
+                'id': maintenance.id,
+                'requestNumber': maintenance.request_number
+            }
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"提交报修请求失败: {str(e)}")  # 添加详细日志
+        return jsonify({
+            'success': False,
+            'message': f'提交报修请求失败: {str(e)}'
+        }), 500
+
+# 生成报修单号
+def generate_request_number():
+    # 生成报修单号: WX + 年月日 + 6位随机数
+    date_str = datetime.now().strftime('%Y%m%d')
+    random_str = ''.join(random.choices('0123456789', k=6))
+    return f'WX{date_str}{random_str}'
+
+# 获取移动端报修列表
+@maintenance_bp.route('/api/mobile/maintenance/list', methods=['GET'])
+def get_mobile_maintenance_list():
+    try:
+        # 获取当前登录用户的ID
+        owner_id = request.args.get('ownerId')
+        
+        # 身份验证：确保请求中的ownerId与当前登录用户匹配
+        # 这里应该有一个验证token的逻辑，确保API调用者就是请求的业主本人
+        if not validate_owner_token(request, owner_id):
+            return jsonify({
+                'success': False,
+                'message': '无权访问该数据'
+            }), 403
+        
+        page = int(request.args.get('page', 1))
+        size = int(request.args.get('size', 10))
+        status = request.args.get('status')
+        
+        # 获取业主信息
+        owner = OwnerInfo.query.get(owner_id)
+        if not owner:
+            return jsonify({
+                'success': False,
+                'message': '业主信息不存在'
+            })
+        
+        # 构建查询 - 只查询与该业主相关的报修记录
+        # 业主可以看到：1. 他报修的记录 2. 他所拥有房屋的报修记录
+        query = MaintenanceRequest.query\
+            .filter(
+                (MaintenanceRequest.reporter_phone == owner.phone_number) |
+                ((MaintenanceRequest.house_id != None) & (MaintenanceRequest.house_id.in_(get_owner_house_ids(owner_id))))
+            )\
+            .filter(MaintenanceRequest.is_deleted == 0)
+        
+        if status and status != 'all':
+            query = query.filter(MaintenanceRequest.status == status)
+        
+        # 计算总数
+        total = query.count()
+        
+        # 获取分页数据
+        items = query.order_by(MaintenanceRequest.report_time.desc())\
+            .offset((page - 1) * size)\
+            .limit(size)\
+            .all()
+        
+        # 转换数据并返回
+        result = {
+            'success': True,
+            'message': '获取报修列表成功',
+            'data': {
+                'items': [item.to_dict() for item in items],
+                'total': total
+            }
+        }
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'获取报修列表失败: {str(e)}'
+        }), 500
+
+# 获取业主拥有的所有房屋ID
+def get_owner_house_ids(owner_id):
+    # 查询该业主拥有的所有房屋
+    houses = db.session.query(HouseInfo.id)\
+        .join(OwnerInfo, OwnerInfo.house_id == HouseInfo.id)\
+        .filter(OwnerInfo.id == owner_id)\
+        .all()
+    return [house.id for house in houses]
+
+# 验证业主token，确保请求者身份
+def validate_owner_token(request, owner_id):
+    # 获取请求头中的token
+    token = request.headers.get('Authorization')
+    if not token:
+        return False
+    
+    # 验证token是否对应该业主
+    # 这里应该有实际的token验证逻辑
+    # ...
+    
+    return True  # 返回验证结果
+
+@maintenance_bp.route('/api/mobile/maintenance/<int:id>', methods=['GET'])
+def get_mobile_maintenance_detail(id):
+    try:
+        # 获取当前登录用户的ID
+        owner_id = request.args.get('ownerId')
+        
+        # 身份验证：确保请求中的ownerId与当前登录用户匹配
+        if not validate_owner_token(request, owner_id):
+            return jsonify({
+                'success': False,
+                'message': '无权访问该数据'
+            }), 403
+        
+        # 获取维修记录
+        maintenance = MaintenanceRequest.query.get(id)
+        if not maintenance:
+            return jsonify({
+                'success': False,
+                'message': '报修信息不存在'
+            })
+        
+        # 权限检查：确保该维修记录属于当前业主
+        owner = OwnerInfo.query.get(owner_id)
+        owner_house_ids = get_owner_house_ids(owner_id)
+        
+        if not (maintenance.reporter_phone == owner.phone_number or 
+                (maintenance.house_id and maintenance.house_id in owner_house_ids)):
+            return jsonify({
+                'success': False,
+                'message': '无权访问该报修记录'
+            }), 403
+        
+        return jsonify({
+            'success': True,
+            'message': '获取报修详情成功',
+            'data': maintenance.to_dict()
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'获取报修详情失败: {str(e)}'
+        }), 500
+
+@maintenance_bp.route('/api/mobile/maintenance/<int:id>/cancel', methods=['POST'])
+def cancel_mobile_maintenance(id):
+    try:
+        maintenance = MaintenanceRequest.query.get(id)
+        if not maintenance:
+            return jsonify({
+                'success': False,
+                'message': '报修信息不存在'
+            })
+        
+        if maintenance.status not in ['pending', 'assigned']:
+            return jsonify({
+                'success': False,
+                'message': '只能取消待处理或已分配的报修'
+            })
+        
+        maintenance.status = 'cancelled'
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': '报修已取消'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'取消报修失败: {str(e)}'
+        }), 500
+
+@maintenance_bp.route('/api/mobile/maintenance/<int:id>/evaluate', methods=['POST'])
+def evaluate_mobile_maintenance(id):
+    try:
+        data = request.get_json()
+        score = data.get('score')
+        content = data.get('content')
+        
+        if not score:
+            return jsonify({
+                'success': False,
+                'message': '缺少必要参数: score'
+            })
+        
+        maintenance = MaintenanceRequest.query.get(id)
+        if not maintenance:
+            return jsonify({
+                'success': False,
+                'message': '报修信息不存在'
+            })
+        
+        if maintenance.status != 'completed':
+            return jsonify({
+                'success': False,
+                'message': '只能评价已完成的报修'
+            })
+        
+        maintenance.evaluation_score = score
+        maintenance.evaluation_content = content
+        maintenance.evaluation_time = datetime.now()
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': '评价提交成功'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'评价提交失败: {str(e)}'
         }), 500

@@ -4,6 +4,8 @@ from .db import db, init_db
 import logging
 import os
 import time
+import random
+from datetime import datetime
 
 # 设置 SQLAlchemy 的日志级别为 WARNING 或更高
 logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
@@ -136,7 +138,9 @@ def create_app():
                         'id': owner.id,
                         'name': owner.name,
                         'phoneNumber': owner.phone_number,
-                        'account': owner.account
+                        'account': owner.account,
+                        'communityId': owner.community_id,
+                        'houseId': owner.house_id
                     }
                 })
             else:
