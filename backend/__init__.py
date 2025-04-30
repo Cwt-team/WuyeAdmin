@@ -51,6 +51,7 @@ def create_app():
     from backend.routes.maintenance import maintenance_bp
     from backend.routes.community_review import community_review_bp
     from backend.routes.complaint import complaint_bp
+    from backend.routes.device import device_bp
 
     # 注册蓝图前记录日志
     logger.info("正在注册维修模块蓝图")
@@ -74,6 +75,11 @@ def create_app():
     app.register_blueprint(personal_info_bp)
     app.register_blueprint(community_review_bp)
     app.register_blueprint(complaint_bp)
+    app.register_blueprint(device_bp)
+    
+    # 初始化UDP服务器（用于设备心跳）
+    from backend.routes.device import init_udp_server
+    init_udp_server(app)
 
     @app.before_request
     def log_request_info():
