@@ -19,7 +19,19 @@ logger = logging.getLogger(__name__)
 
 def create_app():
     app = Flask(__name__)
-    CORS(app, supports_credentials=True)  # 允许跨域请求并支持 Cookie
+    # 确保所有环境下跨域请求都能正常工作
+    CORS(app, 
+         supports_credentials=True,
+         origins=["http://127.0.0.1:8080", "http://localhost:8080", 
+                 "http://116.198.199.38:8080"],
+         allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+         expose_headers=["Content-Disposition"],
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+    
+    # 确保支持凭据
+    app.config['CORS_SUPPORTS_CREDENTIALS'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = "Lax"
+    app.config['SESSION_COOKIE_SECURE'] = False
     app.secret_key = 'your_secret_key'  # 用于 session 加密
     
     # 加载配置

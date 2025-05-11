@@ -18,4 +18,24 @@ module.exports = {
   chainWebpack: config => {
     config.resolve.alias.set('@', path.resolve(__dirname, 'src'));
   },
+  devServer: {
+    proxy: {
+      '/api': {
+        target: 'http://116.198.199.38:5000', // 替换为实际的后端服务器地址
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': '/api', // 保持api前缀
+        },
+        // 确保带上cookie
+        cookieDomainRewrite: {
+          '*': ''
+        },
+        cookiePathRewrite: {
+          '*': '/'
+        }
+      },
+    },
+    port: 8080,
+    open: true,
+  },
 };

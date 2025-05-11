@@ -2,8 +2,9 @@ import axios from 'axios'
 
 // 创建axios实例
 const service = axios.create({
-    baseURL: process.env.VUE_APP_BASE_API || '', // url = base url + request url
-    timeout: 15000 // 请求超时时间
+    baseURL: process.env.VUE_APP_BASE_API || '/api',
+    timeout: 15000, // 请求超时时间
+    withCredentials: true // 允许跨域请求携带cookie
 })
 
 // 请求拦截器
