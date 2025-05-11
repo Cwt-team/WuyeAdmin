@@ -91,11 +91,12 @@ class SipConfig(db.Model):
     __tablename__ = 'sip_config'
     
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True, comment='SIP配置ID')
-    owner_id = db.Column(db.BigInteger, db.ForeignKey('owner_info.id', ondelete='SET NULL'), comment='关联的业主ID，可以为空表示公共账号')
     community_id = db.Column(db.Integer, db.ForeignKey('community_info.id'), nullable=False, comment='关联的小区ID')
     unit_id = db.Column(db.String(20), nullable=False, comment='楼栋单元号')
     room_number = db.Column(db.String(20), nullable=False, comment='房间号')
-    device_code = db.Column(db.String(50), comment='关联的设备编码，可以为空')
+    device_code = db.Column(db.String(50), nullable=False, comment='设备编号')
+    house_id = db.Column(db.Integer, db.ForeignKey('house_info.id'), nullable=True, comment='关联房屋ID')
+    owner_id = db.Column(db.BigInteger, db.ForeignKey('owner_info.id', ondelete='SET NULL'), nullable=True, comment='关联的业主ID')
     phone = db.Column(db.String(20), nullable=False, comment='电话号码')
     sip_host = db.Column(db.String(100), nullable=False, comment='SIP服务器地址')
     sip_port = db.Column(db.String(10), nullable=False, default='5060', comment='SIP端口')
@@ -106,23 +107,31 @@ class SipConfig(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now, nullable=False, comment='创建时间')
     updated_at = db.Column(db.TIMESTAMP, default=datetime.now, onupdate=datetime.now, nullable=False, comment='更新时间')
     
+    # 关联关系
+    house = db.relationship('HouseInfo', backref='sip_configs')
+    owner = db.relationship('OwnerInfo', backref='sip_configs')
+    community = db.relationship('CommunityInfo', backref='sip_configs')
+    
     __table_args__ = (
         db.UniqueConstraint('sip_user', name='uk_sip_user'),
-        db.UniqueConstraint('community_id', 'unit_id', 'room_number', name='uk_unit_room'),
+        db.UniqueConstraint('community_id', 'unit_id', 'room_number', 'device_code', name='uk_unit_room_device'),
+        db.Index('idx_device_search', 'community_id', 'unit_id', 'room_number', 'device_code'),
+        db.Index('idx_device_code', 'device_code'),
     )
     
     def to_dict(self):
         return {
             'id': self.id,
-            'ownerId': self.owner_id,
             'communityId': self.community_id,
             'unitId': self.unit_id,
             'roomNumber': self.room_number,
             'deviceCode': self.device_code,
+            'houseId': self.house_id,
+            'ownerId': self.owner_id,
             'phone': self.phone,
             'sipHost': self.sip_host,
             'sipPort': self.sip_port,
-            'sipUser': self.sip_user,
+            'sipUser': self.sip_user, 
             'sipPassword': self.sip_password,
             'sipDomain': self.sip_domain,
             'isEnabled': self.is_enabled,

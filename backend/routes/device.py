@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, current_app
 from backend.models.device import Device, DevicePhoto, DeviceFace, SipConfig
+from backend.models.community_info import CommunityInfo
 from backend.db import db
 from datetime import datetime
 import time
@@ -433,15 +434,31 @@ def auth_image():
         }), 500
 
 # 获取SIP电话信息
-@device_bp.route('/api/sip/getPhone', methods=['POST'])
+@device_bp.route('/api/sip/getPhone', methods=['GET'])
 def get_phone():
     try:
-        unit_id = request.form.get('unitId')
-        community_id = request.form.get('communityId')
-        room_number = request.form.get('roomNumber')
-        device_code = request.form.get('deviceCode')
+        unit_id = request.args.get('unitId')  # 固定4位
+        community_id_str = request.args.get('communityId')  # 固定6位
+        room_number = request.args.get('roomNumber')  # 固定4位
+        device_code = request.args.get('deviceCode')  # 固定6位
         
-        logger.info(f"获取SIP电话信息请求: unitId={unit_id}, communityId={community_id}, roomNumber={room_number}, deviceCode={device_code}")
+        logger.info(f"获取SIP电话信息请求: unitId={unit_id}, communityId={community_id_str}, roomNumber={room_number}, deviceCode={device_code}")
+        
+        # 将字符串的communityId转换为数据库中的INT类型
+        # 方法1: 直接查询community_info表中是否存在对应的community_number
+        community = db.session.query(CommunityInfo).filter_by(community_number=community_id_str).first()
+        
+        if not community:
+            logger.warning(f"未找到匹配的小区: communityId={community_id_str}")
+            return jsonify({
+                "SIPPassWD": "",
+                "SIPUser": "",
+                "phone": "",
+                "SIPPort": "",
+                "SIPHost": ""
+            }), 404
+            
+        community_id = community.id
         
         # 使用SipConfig模型查询数据
         query = SipConfig.query.filter_by(
@@ -453,11 +470,7 @@ def get_phone():
         
         # 如果提供了设备代码，添加到查询条件中
         if device_code:
-            # 这里处理device_code可能为NULL的情况
-            query = query.filter(db.or_(
-                SipConfig.device_code == device_code,
-                SipConfig.device_code == None
-            ))
+            query = query.filter(SipConfig.device_code == device_code)
             
         sip_config = query.first()
         
@@ -485,4 +498,10 @@ def get_phone():
         
     except Exception as e:
         logger.error(f"获取SIP电话信息失败: {str(e)}")
-        return jsonify({'error': str(e)}), 500 
+        return jsonify({
+            "SIPPassWD": "",
+            "SIPUser": "",
+            "phone": "",
+            "SIPPort": "",
+            "SIPHost": ""
+        }), 500 
