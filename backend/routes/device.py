@@ -7,6 +7,7 @@ import time
 import os
 import logging
 import socket
+import json
 
 
 # 创建蓝图
@@ -59,7 +60,6 @@ def handle_udp_messages(sock, app):
                 logger.info(f"收到来自 {addr} 的UDP消息: {data}")
                 
                 # 解析消息
-                import json
                 try:
                     message = json.loads(data.decode('utf-8'))
                     if message.get('cmd') == 'heart':
@@ -434,13 +434,13 @@ def auth_image():
         }), 500
 
 # 获取SIP电话信息
-@device_bp.route('/api/sip/getPhone', methods=['GET'])
+@device_bp.route('/api/sip/getPhone', methods=['POST'])
 def get_phone():
     try:
-        unit_id = request.args.get('unitId')  # 固定4位
-        community_id_str = request.args.get('communityId')  # 固定6位
-        room_number = request.args.get('roomNumber')  # 固定4位
-        device_code = request.args.get('deviceCode')  # 固定6位
+        unit_id = request.json.get('unitId')  # 固定4位
+        community_id_str = request.json.get('communityId')  # 固定6位
+        room_number = request.json.get('roomNumber')  # 固定4位
+        device_code = request.json.get('deviceCode')  # 固定6位
         
         logger.info(f"获取SIP电话信息请求: unitId={unit_id}, communityId={community_id_str}, roomNumber={room_number}, deviceCode={device_code}")
         
@@ -451,12 +451,16 @@ def get_phone():
         if not community:
             logger.warning(f"未找到匹配的小区: communityId={community_id_str}")
             return jsonify({
-                "SIPPassWD": "",
-                "SIPUser": "",
-                "phone": "",
-                "SIPPort": "",
-                "SIPHost": ""
-            }), 404
+                "data": {
+                    "SIPPassWD": "",
+                    "SIPUser": "",
+                    "phone": "",
+                    "SIPPort": "",
+                    "SIPHost": ""
+                },
+                "message": "未找到匹配的小区",
+                "code": "0001"
+            }), 200
             
         community_id = community.id
         
@@ -477,20 +481,28 @@ def get_phone():
         if not sip_config:
             logger.warning(f"未找到匹配的SIP配置: unitId={unit_id}, communityId={community_id}, roomNumber={room_number}")
             return jsonify({
-                "SIPPassWD": "",
-                "SIPUser": "",
-                "phone": "",
-                "SIPPort": "",
-                "SIPHost": ""
-            }), 404
+                "data": {
+                    "SIPPassWD": "",
+                    "SIPUser": "",
+                    "phone": "",
+                    "SIPPort": "",
+                    "SIPHost": ""
+                },
+                "message": "未找到匹配的SIP配置",
+                "code": "0001"
+            }), 200
         
         # 构建响应数据
         response_data = {
-            "SIPPassWD": sip_config.sip_password,
-            "SIPUser": sip_config.sip_user,
-            "phone": sip_config.phone,
-            "SIPPort": sip_config.sip_port,
-            "SIPHost": sip_config.sip_host
+            "data": {
+                "SIPPassWD": sip_config.sip_password,
+                "SIPUser": sip_config.sip_user,
+                "phone": sip_config.phone,
+                "SIPPort": sip_config.sip_port,
+                "SIPHost": sip_config.sip_host
+            },
+            "message": "",
+            "code": "0000"
         }
         
         # 返回成功响应
@@ -499,9 +511,42 @@ def get_phone():
     except Exception as e:
         logger.error(f"获取SIP电话信息失败: {str(e)}")
         return jsonify({
-            "SIPPassWD": "",
-            "SIPUser": "",
-            "phone": "",
-            "SIPPort": "",
-            "SIPHost": ""
-        }), 500 
+            "data": {
+                "SIPPassWD": "",
+                "SIPUser": "",
+                "phone": "",
+                "SIPPort": "",
+                "SIPHost": ""
+            },
+            "message": f"获取SIP电话信息失败: {str(e)}",
+            "code": "9999"
+        }), 200
+
+# 人脸识别成功回调
+@device_bp.route('/api/sip/faceok', methods=['POST'])
+def face_recognition_callback():
+    try:
+        data = request.json
+        community_id = data.get('communityId')
+        device_code = data.get('deviceCode')
+        state = data.get('state')
+        msg_id = data.get('id')
+        
+        logger.info(f"收到人脸识别回调: communityId={community_id}, deviceCode={device_code}, state={state}")
+        
+        # 在这里处理人脸识别成功的逻辑
+        # TODO: 根据实际需求处理数据
+        
+        return jsonify({
+            "data": {},
+            "message": "人脸识别结果接收成功",
+            "code": "0000"
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"处理人脸识别回调失败: {str(e)}")
+        return jsonify({
+            "data": {},
+            "message": f"处理失败: {str(e)}",
+            "code": "9999"
+        }), 200 
