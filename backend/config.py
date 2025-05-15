@@ -1,9 +1,9 @@
 # 数据库配置
 MYSQL_CONFIG = {
     'host': 'localhost',
-    'port': 3306,
+    'port': 3326,
     'user': 'root',
-    'password': '9109704e0fbafba2',
+    'password': '123456',
     'database': 'Wuye',
     'charset': 'utf8mb4'
 }

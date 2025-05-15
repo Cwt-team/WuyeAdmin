@@ -1,14 +1,19 @@
 # db.py
 from flask_sqlalchemy import SQLAlchemy
 from flask import current_app
+from flask_migrate import Migrate  # 导入Flask-Migrate
 
 # 创建全局 SQLAlchemy 实例
 db = SQLAlchemy()
+migrate = Migrate()  # 创建Migrate实例
 
 def init_db(app):
     """初始化数据库"""
     # 初始化 SQLAlchemy
     db.init_app(app)
+    
+    # 初始化Flask-Migrate
+    migrate.init_app(app, db)
     
     # 创建所有表
     with app.app_context():
