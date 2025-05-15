@@ -4,41 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2150e5b-21bc-481a-bfc4-6aa35e4c4578" name="更改" comment="4.1 完善社区信息列表查询过滤功能；去除社区&amp;房屋重复的后端逻辑以及关联；完善房屋信息列表前后端（遗留：删除和房间号修改）">
-      <change beforePath="$PROJECT_DIR$/.idea/WuyeAdmin.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/WuyeAdmin.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="d2150e5b-21bc-481a-bfc4-6aa35e4c4578" name="更改" comment="5.14 硬件接口完善">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/db.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/db.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/models/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/models/alarm_record.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/alarm_record.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/models/area_maintenance.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/area_maintenance.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/models/building_info.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/models/community_info.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/community_info.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/models/district.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/models/district_info.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/models/house.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/house.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/models/owner.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/owner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/models/personal_info.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/personal_info.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/models/unit_info.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/models/user.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/routes/alarm_record.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/alarm_record.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/routes/area_maintenance.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/routes/community.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/community.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/routes/community_review.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/community_review.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/routes/complaint.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/complaint.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/routes/debug.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/debug.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/routes/house.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/house.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/routes/maintenance.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/maintenance.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/routes/owner.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/owner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/routes/owner_application.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/owner_application.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/routes/personal_info.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/personal_info.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/routes/property_admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/property_admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/scripts/insert_test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/scripts/insert_test_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/HouseInfoList.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/HouseInfoList.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/models/owner_application.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routes/owner_application.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Dashboard.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Dashboard.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/OwnerApplyList.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/router/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/router/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,28 +60,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python 测试.Python 测试 (udp_server.py 内).executor": "Run",
-    "Python 测试.test_db.test_db_connection 的 Python 测试.executor": "Run",
-    "Python.app.executor": "Run",
-    "Python.device.executor": "Run",
-    "Python.device_monitor.executor": "Run",
-    "Python.udp_server.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "repair3.14",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "F:/Wuye/WuyeAdmin1",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.grazie",
-    "ts.external.directory.path": "E:\\environment2\\PyCharm 2024.2.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python 测试.Python 测试 (udp_server.py 内).executor&quot;: &quot;Run&quot;,
+    &quot;Python 测试.test_db.test_db_connection 的 Python 测试.executor&quot;: &quot;Run&quot;,
+    &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.device.executor&quot;: &quot;Run&quot;,
+    &quot;Python.device_monitor.executor&quot;: &quot;Run&quot;,
+    &quot;Python.udp_server.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;server/1.0&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;F:/Wuye/5.12  main/WuyeAdmin&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.grazie&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;E:\\environment2\\PyCharm 2024.2.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Python.app">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="WuyeAdmin" />
@@ -268,6 +241,15 @@
       <workItem from="1743562932277" duration="4244000" />
       <workItem from="1743643142779" duration="1459000" />
       <workItem from="1743645046432" duration="2487000" />
+      <workItem from="1746667503385" duration="4058000" />
+      <workItem from="1746754023728" duration="7807000" />
+      <workItem from="1747013446308" duration="28000" />
+      <workItem from="1747028068133" duration="6896000" />
+      <workItem from="1747096848963" duration="14000" />
+      <workItem from="1747190441061" duration="3428000" />
+      <workItem from="1747208682187" duration="653000" />
+      <workItem from="1747219691463" duration="15000" />
+      <workItem from="1747288447103" duration="501000" />
     </task>
     <task id="LOCAL-00001" summary="v0.0.1 硬件UDP通信端口（demo）">
       <option name="closed" value="true" />
@@ -317,7 +299,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743497108251</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="5.14 硬件接口完善">
+      <option name="closed" value="true" />
+      <created>1747193988955</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1747193988955</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -369,7 +359,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="HEAD" />
+                        <option value="origin/server/1.0" />
                       </list>
                     </value>
                   </entry>
@@ -383,16 +373,17 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="v0.0.1 硬件UDP通信端口（demo）" />
-    <MESSAGE value="v0.1.1 新增了区域维护管理板块（报事报修、社区评价、投诉建议）内容为完成" />
     <MESSAGE value="v0.1.4 修改了报事报修的社区查询问题（楼栋有bug、房间号待定）" />
     <MESSAGE value="v0.1.5 修改了报事报修的社区查询问题（新增单元选择，楼栋、房间号有bug，）" />
     <MESSAGE value="3.30 完善社区评价页面前后端以及按钮细节；完善投诉建议页面前后端（按钮细节未完善） v2" />
     <MESSAGE value="4.1 完善社区信息列表查询过滤功能；去除社区&amp;房屋重复的后端逻辑以及关联；完善房屋信息列表前后端（遗留：删除和房间号修改）" />
-    <option name="LAST_COMMIT_MESSAGE" value="4.1 完善社区信息列表查询过滤功能；去除社区&amp;房屋重复的后端逻辑以及关联；完善房屋信息列表前后端（遗留：删除和房间号修改）" />
+    <MESSAGE value="v0.1.1 新增了区域维护管理板块（报事报修、社区评价、投诉建议）内容为完成" />
+    <MESSAGE value="5.14 硬件接口完善" />
+    <option name="LAST_COMMIT_MESSAGE" value="5.14 硬件接口完善" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/WuyeAdmin$app.coverage" NAME="app 覆盖结果" MODIFIED="1743643146655" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend" />
     <SUITE FILE_PATH="coverage/WuyeAdmin1$app.coverage" NAME="app 覆盖结果" MODIFIED="1743648717512" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend" />
+    <SUITE FILE_PATH="coverage/WuyeAdmin$app.coverage" NAME="app 覆盖结果" MODIFIED="1747028824571" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend" />
     <SUITE FILE_PATH="coverage/WuyeAdmin$.coverage" NAME=" 覆盖结果" MODIFIED="1743565705797" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend" />
   </component>
 </project>

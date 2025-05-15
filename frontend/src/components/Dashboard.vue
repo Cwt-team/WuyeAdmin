@@ -117,7 +117,7 @@ export default {
           icon: 'el-icon-user',
           children: [
             { id: 1, name: '业主信息列表', component: 'OwnerInfoList' },
-            { id: 2, name: '业主申请列表', component: 'OwnerApplyList' },
+            { id: 2, name: '房屋绑定申请', component: 'HousingApplicationList' },
           ],
         },
         {

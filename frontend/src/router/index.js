@@ -46,6 +46,18 @@ const routes = [
     name: 'DeviceHeartbeats',
     component: () => import('../components/DeviceHeartbeats.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/housing-applications',
+    name: 'HousingApplications',
+    component: () => import('../components/HousingApplicationList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/housing-applications/:id',
+    name: 'HousingApplicationDetail',
+    component: () => import('../components/HousingApplicationDetail.vue'),
+    meta: { requiresAuth: true }
   }
 ]
 

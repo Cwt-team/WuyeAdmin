@@ -51,7 +51,6 @@ def create_app():
     from backend.routes.property_admin import property_admin_bp
     from backend.routes.owner import owner_bp
     from backend.models.owner import OwnerInfo
-    from backend.routes.owner_application import owner_application_bp
     from backend.routes.room_notification import room_notification_bp
     from backend.routes.community_notification import community_notification_bp
     from backend.routes.advertisement import advertisement_bp
@@ -64,6 +63,8 @@ def create_app():
     from backend.routes.community_review import community_review_bp
     from backend.routes.complaint import complaint_bp
     from backend.routes.device import device_bp
+    from backend.routes.mobile_api import mobile_api_bp
+    from backend.routes.housing_application import housing_application_bp
 
     # 注册蓝图前记录日志
     logger.info("正在注册维修模块蓝图")
@@ -77,7 +78,6 @@ def create_app():
     app.register_blueprint(community_admin_bp)
     app.register_blueprint(property_admin_bp)
     app.register_blueprint(owner_bp)
-    app.register_blueprint(owner_application_bp)
     app.register_blueprint(room_notification_bp)
     app.register_blueprint(community_notification_bp)
     app.register_blueprint(advertisement_bp)
@@ -88,6 +88,8 @@ def create_app():
     app.register_blueprint(community_review_bp)
     app.register_blueprint(complaint_bp)
     app.register_blueprint(device_bp)
+    app.register_blueprint(mobile_api_bp)
+    app.register_blueprint(housing_application_bp)
     
     # 初始化UDP服务器（用于设备心跳）
     from backend.routes.device import init_udp_server
@@ -135,45 +137,6 @@ def create_app():
             return jsonify({'success': True, 'message': '登录成功'})
         
         return jsonify({'success': False, 'message': '用户名或密码错误'})
-
-    # 修改移动端登录的路由路径为 /api/mobile/login
-    @app.route('/api/mobile/login', methods=['POST'])
-    def mobile_login():
-        data = request.form
-        username = data.get('username')
-        password = data.get('password')
-        
-        try:
-            # 验证账号密码
-            owner = db.session.query(OwnerInfo).filter_by(account=username, password=password).first()
-            
-            if owner:
-                # 成功找到用户
-                return jsonify({
-                    'success': True,
-                    'message': '登录成功',
-                    'ownerInfo': {
-                        'id': owner.id,
-                        'name': owner.name,
-                        'phoneNumber': owner.phone_number,
-                        'account': owner.account,
-                        'communityId': owner.community_id,
-                        'houseId': owner.house_id
-                    }
-                })
-            else:
-                # 未找到用户
-                return jsonify({
-                    'success': False,
-                    'message': '账号或密码错误'
-                })
-        except Exception as e:
-            # 记录错误
-            app.logger.error(f"移动端登录失败: {str(e)}")
-            return jsonify({
-                'success': False,
-                'message': f'登录失败: {str(e)}'
-            })
 
     @app.route('/api/owners/export-template', methods=['GET'])
     def export_owner_template():
@@ -330,136 +293,6 @@ def create_app():
     @app.route('/api/ping', methods=['GET'])
     def ping():
         return '', 200  # 返回空响应，状态码 200
-
-    # 为移动端添加获取业主详细信息的API接口
-    @app.route('/api/mobile/owners/<int:owner_id>', methods=['GET'])
-    def get_owner_detail_by_id(owner_id):
-        try:
-            owner = db.session.query(OwnerInfo).filter_by(id=owner_id).first()
-            
-            if not owner:
-                return jsonify({'success': False, 'message': '业主不存在'}), 404
-            
-            # 获取关联的小区和房屋信息
-            community = owner.community
-            house = owner.house
-            
-            # 构建详细的业主信息
-            owner_data = {
-                'id': owner.id,
-                'name': owner.name,
-                'phoneNumber': owner.phone_number,
-                'account': owner.account,
-                'gender': owner.gender,
-                'idCard': owner.id_card,
-                'email': owner.email,
-                'city': owner.city,
-                'address': owner.address,
-                'ownerType': owner.owner_type,
-                'faceImage': owner.face_image,
-                'faceStatus': owner.face_status,
-                'communityInfo': {
-                    'id': community.id,
-                    'name': community.community_name,
-                    'city': community.community_city
-                },
-                'houseInfo': {
-                    'id': house.id,
-                    'fullName': house.house_full_name,
-                    'districtNumber': house.district_number,
-                    'buildingNumber': house.building_number,
-                    'unitNumber': house.unit_number,
-                    'roomNumber': house.room_number
-                }
-            }
-            
-            # 获取业主权限信息
-            permissions = owner.permissions.first()
-            if permissions:
-                owner_data['permissions'] = {
-                    'id': permissions.id,
-                    'permissionStatus': permissions.permission_status,
-                    'validPeriod': permissions.valid_period,
-                    'callingEnabled': permissions.calling_enabled,
-                    'pstnEnabled': permissions.pstn_enabled
-                }
-            
-            return jsonify({'success': True, 'data': owner_data})
-        except Exception as e:
-            app.logger.error(f"获取业主详细信息失败: {str(e)}")
-            return jsonify({'success': False, 'message': f'获取业主详细信息失败: {str(e)}'}), 500
-
-    # 为移动端添加更新业主信息的API接口
-    @app.route('/api/mobile/owners/<int:owner_id>', methods=['PUT'])
-    def update_owner_info(owner_id):
-        try:
-            data = request.json
-            owner = db.session.query(OwnerInfo).filter_by(id=owner_id).first()
-            
-            if not owner:
-                return jsonify({'success': False, 'message': '业主不存在'}), 404
-            
-            # 只允许更新部分字段
-            allowed_fields = ['email', 'city', 'address']
-            for field in allowed_fields:
-                if field in data:
-                    setattr(owner, field, data[field])
-            
-            # 更新密码（需要验证旧密码）
-            if 'oldPassword' in data and 'newPassword' in data:
-                if owner.password == data['oldPassword']:
-                    owner.password = data['newPassword']
-                else:
-                    return jsonify({'success': False, 'message': '原密码不正确'}), 400
-            
-            # 保存更改
-            db.session.commit()
-            
-            return jsonify({'success': True, 'message': '信息更新成功'})
-        except Exception as e:
-            db.session.rollback()
-            app.logger.error(f"更新业主信息失败: {str(e)}")
-            return jsonify({'success': False, 'message': f'更新业主信息失败: {str(e)}'}), 500
-
-    # 为移动端添加上传人脸图像的API接口
-    @app.route('/api/mobile/owners/<int:owner_id>/face', methods=['POST'])
-    def upload_owner_face(owner_id):
-        try:
-            if 'image' not in request.files:
-                return jsonify({'success': False, 'message': '未上传图片'}), 400
-            
-            file = request.files['image']
-            if file.filename == '':
-                return jsonify({'success': False, 'message': '文件名为空'}), 400
-            
-            # 查找业主
-            owner = db.session.query(OwnerInfo).filter_by(id=owner_id).first()
-            if not owner:
-                return jsonify({'success': False, 'message': '业主不存在'}), 404
-            
-            # 保存图片
-            filename = f'owner_face_{owner_id}_{int(time.time())}.jpg'
-            upload_folder = os.path.join(app.root_path, 'static', 'uploads', 'faces')
-            os.makedirs(upload_folder, exist_ok=True)
-            
-            file_path = os.path.join(upload_folder, filename)
-            file.save(file_path)
-            
-            # 更新业主人脸信息
-            owner.face_image = f'/static/uploads/faces/{filename}'
-            owner.face_status = 1  # 已录入
-            db.session.commit()
-            
-            return jsonify({
-                'success': True, 
-                'message': '人脸图像上传成功',
-                'faceImage': owner.face_image,
-                'faceStatus': owner.face_status
-            })
-        except Exception as e:
-            db.session.rollback()
-            app.logger.error(f"上传人脸图像失败: {str(e)}")
-            return jsonify({'success': False, 'message': f'上传人脸图像失败: {str(e)}'}), 500
 
     return app
 
