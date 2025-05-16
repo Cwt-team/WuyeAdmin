@@ -533,16 +533,43 @@ export default {
 
 .door-card {
   margin-bottom: 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--box-shadow);
   transition: all 0.3s;
-  background: #fff url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2YwZjJmNSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItbG9jayI+PHJlY3QgeD0iMyIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxMSIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PHBhdGggZD0iTTcgMTFWN2E1IDUgMCAwIDEgMTAgMHY0Ij48L3BhdGg+PC9zdmc+') no-repeat 98% 95%;
-  background-size: 120px;
+  background: var(--card-bg-gradient);
+  position: relative;
+}
+
+.door-card::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.03));
+  border-radius: 0 0 0 150px;
+  z-index: 0;
+}
+
+.door-card::after {
+  content: '';
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  width: 100px;
+  height: 100px;
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNlMGU4ZjUiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLWxvY2siPjxyZWN0IHg9IjMiIHk9IjExIiB3aWR0aD0iMTgiIGhlaWdodD0iMTEiIHJ4PSIyIiByeT0iMiI+PC9yZWN0PjxwYXRoIGQ9Ik03IDExVjdhNSA1IDAgMCAxIDEwIDB2NCI+PC9wYXRoPjwvc3ZnPg==');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100px;
+  opacity: 0.2;
+  z-index: 1;
 }
 
 .door-card:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--box-shadow-hover);
   transform: translateY(-3px);
 }
 
@@ -550,15 +577,21 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(90deg, var(--bg-color-light), var(--bg-color));
+  position: relative;
+  z-index: 2;
 }
 
 .card-header span {
   font-size: 18px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-primary);
   position: relative;
-  padding-left: 28px;
+  padding-left: 32px;
+  display: flex;
+  align-items: center;
 }
 
 .card-header span::before {
@@ -567,18 +600,34 @@ export default {
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
-  background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM0MDlFRkYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLWtleSI+PHBhdGggZD0iTTIxIDE2VjhhMiAyIDAgMCAwLTEtMS43M2wtNy00YTIgMiAwIDAgMC0yIDBsLTcgNEEyIDIgMCAwIDAgMyA4djhhMiAyIDAgMCAwIDEgMS43M2w3IDRhMiAyIDAgMCAwIDIgMGw3LTRBMiAyIDAgMCAwIDIxIDE2eiI+PC9wYXRoPjxwb2x5bGluZSBwb2ludHM9IjcuODggMyAxMiA1LjEgMTYuMTIgMyI+PC9wb2x5bGluZT48bGluZSB4MT0iMTIiIHkxPSIyMi4wOCIgeDI9IjEyIiB5Mj0iNSI+PC9saW5lPjwvc3ZnPg==') no-repeat center center;
+  width: 24px;
+  height: 24px;
+  background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMzNDk4ZGIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLWtleSI+PHBhdGggZD0iTTIxIDE2VjhhMiAyIDAgMCAwLTEtMS43M2wtNy00YTIgMiAwIDAgMC0yIDBsLTcgNEEyIDIgMCAwIDAgMyA4djhhMiAyIDAgMCAwIDEgMS43M2w3IDRhMiAyIDAgMCAwIDIgMGw3LTRBMiAyIDAgMCAwIDIxIDE2eiI+PC9wYXRoPjxwb2x5bGluZSBwb2ludHM9IjcuODggMyAxMiA1LjEgMTYuMTIgMyI+PC9wb2x5bGluZT48bGluZSB4MT0iMTIiIHkxPSIyMi4wOCIgeDI9IjEyIiB5Mj0iNSI+PC9saW5lPjwvc3ZnPg==') no-repeat center center;
   background-size: contain;
 }
 
 .search-box {
   margin-bottom: 20px;
-  background-color: #f8fafc;
+  background-color: rgba(248, 250, 252, 0.8);
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--border-color-light);
+  backdrop-filter: blur(5px);
+  position: relative;
+  overflow: hidden;
+}
+
+.search-box::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), rgba(52, 152, 219, 0.02));
+  border-radius: 50%;
+  z-index: 0;
 }
 
 .pagination-container {
@@ -603,30 +652,38 @@ export default {
   background-color: rgba(103, 194, 58, 0.1);
   border-color: rgba(103, 194, 58, 0.2);
   color: #67c23a;
+  border-radius: 12px;
+  padding: 6px 12px;
 }
 
 :deep(.el-tag--danger) {
   background-color: rgba(245, 108, 108, 0.1);
   border-color: rgba(245, 108, 108, 0.2);
   color: #f56c6c;
+  border-radius: 12px;
+  padding: 6px 12px;
 }
 
 :deep(.el-tag--warning) {
   background-color: rgba(230, 162, 60, 0.1);
   border-color: rgba(230, 162, 60, 0.2);
   color: #e6a23c;
+  border-radius: 12px;
+  padding: 6px 12px;
 }
 
 /* 表格样式优化 */
 :deep(.el-table) {
   border-radius: 8px;
   overflow: hidden;
+  box-shadow: var(--box-shadow-light);
 }
 
 :deep(.el-table__header-wrapper th) {
-  background-color: #f5f7fa;
-  color: #606266;
+  background-color: var(--bg-color-darker) !important;
+  color: var(--text-regular);
   font-weight: 600;
+  padding: 12px 0;
 }
 
 :deep(.el-table__row) {
@@ -638,6 +695,12 @@ export default {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
   z-index: 2;
   position: relative;
+  background-color: var(--primary-light) !important;
+}
+
+/* 表格行交替颜色 */
+:deep(.el-table__row:nth-child(even)) {
+  background-color: var(--primary-lighter);
 }
 
 :deep(.el-button) {
@@ -651,31 +714,66 @@ export default {
 
 /* 对话框样式 */
 :deep(.el-dialog) {
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: var(--box-shadow-hover);
 }
 
 :deep(.el-dialog__header) {
-  background-color: #f5f7fa;
+  background-color: var(--bg-color);
   margin: 0;
-  padding: 15px 20px;
-  border-bottom: 1px solid #ebeef5;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 :deep(.el-dialog__title) {
   font-weight: 600;
-  color: #303133;
+  color: var(--text-primary);
 }
 
 :deep(.el-dialog__body) {
-  padding: 20px 30px;
+  padding: 24px 30px;
+}
+
+:deep(.el-form-item) {
+  margin-bottom: 22px;
 }
 
 :deep(.el-form-item__label) {
   font-weight: 500;
+  padding-bottom: 8px;
 }
 
 :deep(.el-input), :deep(.el-select), :deep(.el-date-editor) {
-  border-radius: 4px;
+  border-radius: 8px;
+  width: 100%;
+}
+
+:deep(.el-input__inner), :deep(.el-textarea__inner) {
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+:deep(.el-input__inner:focus), :deep(.el-textarea__inner:focus) {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
+
+/* 报修按钮特殊样式 */
+:deep(.el-button--warning) {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
+}
+
+:deep(.el-button--warning:hover) {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  box-shadow: 0 6px 14px rgba(230, 126, 34, 0.4);
+}
+
+/* 添加维修表单特色样式 */
+:deep(.maintenance-form .el-form-item__label) {
+  color: #e67e22;
 }
 </style>  

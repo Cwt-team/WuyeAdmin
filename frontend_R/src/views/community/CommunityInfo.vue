@@ -11,33 +11,98 @@
       <!-- 搜索区域 -->
       <div class="search-box">
         <el-form :inline="true" :model="searchForm">
-          <el-form-item label="小区名称">
-            <el-input v-model="searchForm.name" placeholder="请输入小区名称" clearable></el-input>
-          </el-form-item>
-          <el-form-item label="所在地区">
-            <el-input v-model="searchForm.area" placeholder="请输入所在地区" clearable></el-input>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="handleSearch">查询</el-button>
-            <el-button @click="handleReset">重置</el-button>
-          </el-form-item>
+          <el-row :gutter="20">
+            <el-col :span="6">
+              <el-form-item label="小区名称/编号">
+                <el-input v-model="searchForm.keyword" placeholder="请输入小区名称/编号" clearable></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item label="所在城市">
+                <el-input v-model="searchForm.location" placeholder="请输入所在城市" clearable></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item label="门禁卡类型">
+                <el-select v-model="searchForm.accessCardType" placeholder="选择门禁卡类型" clearable class="custom-select">
+                  <el-option label="NFC" value="NFC" />
+                  <el-option label="IC卡" value="IC卡" />
+                  <el-option label="NONE" value="NONE" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item label="启用状态">
+                <el-select v-model="searchForm.isEnabled" placeholder="选择启用状态" clearable class="custom-select">
+                  <el-option label="启用" :value="1" />
+                  <el-option label="禁用" :value="0" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="20">
+            <el-col :span="6">
+              <el-form-item label="APP人脸录入">
+                <el-select v-model="searchForm.appRecordFace" placeholder="选择人脸录入状态" clearable class="custom-select">
+                  <el-option label="开启" :value="1" />
+                  <el-option label="关闭" :value="0" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item label="记录上传">
+                <el-select v-model="searchForm.isRecordUpload" placeholder="选择记录上传状态" clearable class="custom-select">
+                  <el-option label="开启" :value="1" />
+                  <el-option label="关闭" :value="0" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item label="配置同步">
+                <el-select v-model="searchForm.isSameStep" placeholder="选择配置同步状态" clearable class="custom-select">
+                  <el-option label="已同步" :value="1" />
+                  <el-option label="未同步" :value="0" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item>
+                <el-button type="primary" @click="handleSearch" class="custom-button search-btn">查询</el-button>
+                <el-button @click="handleReset" class="custom-button reset-btn">重置</el-button>
+              </el-form-item>
+            </el-col>
+          </el-row>
         </el-form>
       </div>
       
       <!-- 表格区域 -->
       <el-table :data="communityList" border style="width: 100%" v-loading="tableLoading">
         <el-table-column type="index" width="50" label="序号"></el-table-column>
+        <el-table-column prop="code" label="小区编号"></el-table-column>
         <el-table-column prop="name" label="小区名称"></el-table-column>
         <el-table-column prop="area" label="所在地区"></el-table-column>
-        <el-table-column prop="address" label="详细地址"></el-table-column>
-        <el-table-column prop="developer" label="开发商"></el-table-column>
         <el-table-column prop="buildingCount" label="楼栋数量"></el-table-column>
         <el-table-column prop="houseCount" label="房屋数量"></el-table-column>
+        <el-table-column prop="accessCardType" label="门禁卡类型"></el-table-column>
+        <el-table-column prop="appRecordFace" label="APP人脸录入">
+          <template #default="scope">
+            <el-tag :type="scope.row.appRecordFace === 1 ? 'success' : 'info'">
+              {{ scope.row.appRecordFace === 1 ? '开启' : '关闭' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="isSameStep" label="配置同步">
+          <template #default="scope">
+            <el-tag :type="scope.row.isSameStep === 1 ? 'success' : 'warning'">
+              {{ scope.row.isSameStep === 1 ? '已同步' : '未同步' }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="createTime" label="创建时间"></el-table-column>
         <el-table-column label="操作" width="180">
           <template #default="scope">
-            <el-button type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
+            <el-button type="primary" size="small" @click="handleEdit(scope.row)" class="custom-button edit-btn">编辑</el-button>
+            <el-button type="danger" size="small" @click="handleDelete(scope.row)" class="custom-button delete-btn">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -72,7 +137,7 @@
         <el-form-item label="详细地址" prop="address">
           <el-input v-model="formData.address" placeholder="请输入详细地址"></el-input>
         </el-form-item>
-        <el-form-item label="开发商" prop="developer">
+        <el-form-item label="开发商" prop="developer" v-if="false">
           <el-input v-model="formData.developer" placeholder="请输入开发商"></el-input>
         </el-form-item>
         <el-form-item label="楼栋数量" prop="buildingCount">
@@ -81,14 +146,30 @@
         <el-form-item label="房屋数量" prop="houseCount">
           <el-input-number v-model="formData.houseCount" :min="0" :precision="0"></el-input-number>
         </el-form-item>
+        <el-form-item label="门禁卡类型" prop="accessCardType">
+          <el-select v-model="formData.accessCardType" placeholder="请选择门禁卡类型">
+            <el-option label="NFC" value="NFC"></el-option>
+            <el-option label="IC卡" value="IC卡"></el-option>
+            <el-option label="NONE" value="NONE"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="APP人脸录入" prop="appRecordFace">
+          <el-switch v-model="formData.appRecordFace" :active-value="1" :inactive-value="0"></el-switch>
+        </el-form-item>
+        <el-form-item label="配置同步状态" prop="isSameStep">
+          <el-switch v-model="formData.isSameStep" :active-value="1" :inactive-value="0"></el-switch>
+        </el-form-item>
+        <el-form-item label="记录上传开关" prop="isRecordUpload">
+          <el-switch v-model="formData.isRecordUpload" :active-value="1" :inactive-value="0"></el-switch>
+        </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注信息"></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="dialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitForm" :loading="submitLoading">确 定</el-button>
+          <el-button @click="dialogVisible = false" class="custom-button cancel-btn">取 消</el-button>
+          <el-button type="primary" @click="submitForm" :loading="submitLoading" class="custom-button confirm-btn">确 定</el-button>
         </span>
       </template>
     </el-dialog>
@@ -98,15 +179,20 @@
 <script>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-// import axios from 'axios'
+import communityApi from '../../api/community'
 
 export default {
   name: 'CommunityInfoView',
   setup() {
     // 搜索表单
     const searchForm = reactive({
-      name: '',
-      area: ''
+      keyword: '',
+      location: '',
+      accessCardType: '',
+      isEnabled: '',
+      appRecordFace: '',
+      isRecordUpload: '',
+      isSameStep: ''
     })
     
     // 表格数据
@@ -135,7 +221,11 @@ export default {
       developer: '',
       buildingCount: 0,
       houseCount: 0,
-      remark: ''
+      remark: '',
+      accessCardType: 'NFC',
+      appRecordFace: 1,
+      isSameStep: 1,
+      isRecordUpload: 1
     })
     
     // 表单验证规则
@@ -156,161 +246,187 @@ export default {
     const fetchCommunityList = async () => {
       tableLoading.value = true
       try {
-        // 在实际应用中，这里应该调用API接口获取数据
-        // const response = await axios.get('/api/community/list', {
-        //   params: {
-        //     page: pagination.currentPage,
-        //     pageSize: pagination.pageSize,
-        //     ...searchForm
-        //   }
-        // })
+        // 调用API接口获取数据
+        const response = await communityApi.getCommunityList({
+          page: pagination.currentPage,
+          size: pagination.pageSize,
+          keyword: searchForm.keyword,
+          location: searchForm.location,
+          accessCardType: searchForm.accessCardType,
+          isEnabled: searchForm.isEnabled,
+          appRecordFace: searchForm.appRecordFace,
+          isRecordUpload: searchForm.isRecordUpload,
+          isSameStep: searchForm.isSameStep
+        })
         
-        // 模拟数据，实际应用中应该使用API返回的数据
-        setTimeout(() => {
-          communityList.value = [
-            {
-              id: '1',
-              name: '阳光花园',
-              area: '西湖区',
-              address: '杭州市西湖区文三路123号',
-              developer: '阳光地产',
-              buildingCount: 12,
-              houseCount: 360,
-              createTime: '2023-05-12'
-            },
-            {
-              id: '2',
-              name: '翠湖居',
-              area: '滨江区',
-              address: '杭州市滨江区江南大道500号',
-              developer: '绿城地产',
-              buildingCount: 8,
-              houseCount: 240,
-              createTime: '2023-06-18'
-            }
-          ]
-          pagination.total = 2
-          tableLoading.value = false
-        }, 500)
+        // 处理后端返回的数据格式
+        // 后端直接返回 {items: [...], total: 22} 的格式
+        if (response.success && response.data) {
+          // 如果response被request.js处理过，已经有标准格式
+          communityList.value = response.data.list || []
+          pagination.total = response.data.total || 0
+        } else if (response.items) {
+          // 直接处理后端原始返回格式
+          // 将后端返回的数据格式转换为前端所需的格式
+          communityList.value = response.items.map(item => communityApi.transformCommunityData(item))
+          pagination.total = response.total || 0
+        } else {
+          communityList.value = []
+          pagination.total = 0
+          ElMessage.error('获取小区列表失败：数据格式不正确')
+        }
       } catch (error) {
         console.error('获取小区列表失败:', error)
-        ElMessage.error('获取小区列表失败')
+        ElMessage.error('获取小区列表失败，请稍后重试')
+      } finally {
         tableLoading.value = false
       }
     }
     
-    // 搜索
-    const handleSearch = () => {
-      pagination.currentPage = 1
-      fetchCommunityList()
-    }
-    
-    // 重置搜索
-    const handleReset = () => {
-      Object.keys(searchForm).forEach(key => {
-        searchForm[key] = ''
-      })
-      pagination.currentPage = 1
-      fetchCommunityList()
-    }
-    
-    // 添加小区
+    // 处理添加小区
     const handleAdd = () => {
       dialogType.value = 'add'
       resetForm()
       dialogVisible.value = true
     }
     
-    // 编辑小区
+    // 处理编辑小区
     const handleEdit = (row) => {
       dialogType.value = 'edit'
       resetForm()
-      Object.keys(formData).forEach(key => {
-        if (row[key] !== undefined) {
-          formData[key] = row[key]
-        }
-      })
+      // 复制行数据到表单
+      formData.id = row.id
+      formData.name = row.name
+      formData.area = row.area
+      formData.address = row.address
+      formData.developer = row.developer || ''
+      formData.buildingCount = row.buildingCount
+      formData.houseCount = row.houseCount
+      formData.remark = row.remark || ''
+      formData.accessCardType = row.accessCardType
+      formData.appRecordFace = row.appRecordFace
+      formData.isSameStep = row.isSameStep
+      formData.isRecordUpload = row.isRecordUpload
+      
       dialogVisible.value = true
     }
     
-    // 删除小区
-    // eslint-disable-next-line no-unused-vars
+    // 处理删除小区
     const handleDelete = (row) => {
-      ElMessageBox.confirm('确认删除该小区信息吗？', '提示', {
+      ElMessageBox.confirm('确定要删除该小区吗？删除后不可恢复', '警告', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async () => {
         try {
-          // 实际应用中应该调用API接口
-          // await axios.delete(`/api/community/${row.id}`)
-          ElMessage.success('删除成功')
-          fetchCommunityList()
+          const response = await communityApi.deleteCommunity(row.id)
+          if (response.success === true) {
+            ElMessage.success('删除成功')
+            fetchCommunityList()
+          } else if (response.success === undefined && !response.error) {
+            // 如果后端没有返回success字段，但也没有返回error，则认为成功
+            ElMessage.success('删除成功')
+            fetchCommunityList()
+          } else {
+            ElMessage.error(response.message || response.error || '删除失败')
+          }
         } catch (error) {
           console.error('删除小区失败:', error)
-          ElMessage.error('删除小区失败')
+          ElMessage.error('删除小区失败，请稍后重试')
         }
       }).catch(() => {
         // 取消删除
       })
     }
     
-    // 表单提交
-    const submitForm = () => {
-      if (formRef.value) {
-        formRef.value.validate(async (valid) => {
-          if (valid) {
-            submitLoading.value = true
-            try {
-              // 实际应用中应该调用API接口
-              if (dialogType.value === 'add') {
-                // 添加
-                // await axios.post('/api/community', formData)
-                ElMessage.success('添加成功')
-              } else {
-                // 编辑
-                // await axios.put(`/api/community/${formData.id}`, formData)
-                ElMessage.success('编辑成功')
-              }
-              dialogVisible.value = false
-              fetchCommunityList()
-            } catch (error) {
-              console.error('提交表单失败:', error)
-              ElMessage.error('提交表单失败')
-            } finally {
-              submitLoading.value = false
-            }
-          }
-        })
+    // 提交表单
+    const submitForm = async () => {
+      if (!formRef.value) return
+      
+      try {
+        await formRef.value.validate()
+        
+        submitLoading.value = true
+        let response
+        
+        if (dialogType.value === 'add') {
+          // 添加小区
+          response = await communityApi.createCommunity(formData)
+        } else {
+          // 编辑小区
+          response = await communityApi.updateCommunity(formData.id, formData)
+        }
+        
+        if (response.success === true) {
+          ElMessage.success(dialogType.value === 'add' ? '添加成功' : '更新成功')
+          dialogVisible.value = false
+          fetchCommunityList()
+        } else if (response.success === undefined && !response.error) {
+          // 如果后端没有返回success字段，但也没有返回error，则认为成功
+          ElMessage.success(dialogType.value === 'add' ? '添加成功' : '更新成功')
+          dialogVisible.value = false
+          fetchCommunityList()
+        } else {
+          ElMessage.error(response.message || response.error || (dialogType.value === 'add' ? '添加失败' : '更新失败'))
+        }
+      } catch (error) {
+        console.error(dialogType.value === 'add' ? '添加小区失败:' : '更新小区失败:', error)
+        ElMessage.error(dialogType.value === 'add' ? '添加小区失败，请稍后重试' : '更新小区失败，请稍后重试')
+      } finally {
+        submitLoading.value = false
       }
     }
     
     // 重置表单
     const resetForm = () => {
-      formData.id = ''
-      formData.name = ''
-      formData.area = ''
-      formData.address = ''
-      formData.developer = ''
-      formData.buildingCount = 0
-      formData.houseCount = 0
-      formData.remark = ''
+      Object.keys(formData).forEach(key => {
+        if (key === 'id') {
+          formData[key] = ''
+        } else if (key === 'buildingCount' || key === 'houseCount') {
+          formData[key] = 0
+        } else {
+          formData[key] = ''
+        }
+      })
+      
       if (formRef.value) {
         formRef.value.resetFields()
       }
     }
     
-    // 分页处理
-    const handleSizeChange = (size) => {
-      pagination.pageSize = size
+    // 处理搜索
+    const handleSearch = () => {
+      pagination.currentPage = 1
       fetchCommunityList()
     }
     
-    const handleCurrentChange = (page) => {
-      pagination.currentPage = page
+    // 处理重置
+    const handleReset = () => {
+      searchForm.keyword = ''
+      searchForm.location = ''
+      searchForm.accessCardType = ''
+      searchForm.isEnabled = ''
+      searchForm.appRecordFace = ''
+      searchForm.isRecordUpload = ''
+      searchForm.isSameStep = ''
+      pagination.currentPage = 1
       fetchCommunityList()
     }
     
+    // 处理页码变化
+    const handleCurrentChange = (currentPage) => {
+      pagination.currentPage = currentPage
+      fetchCommunityList()
+    }
+    
+    // 处理每页条数变化
+    const handleSizeChange = (pageSize) => {
+      pagination.pageSize = pageSize
+      pagination.currentPage = 1
+      fetchCommunityList()
+    }
+    
+    // 初始化
     onMounted(() => {
       fetchCommunityList()
     })
@@ -332,8 +448,8 @@ export default {
       handleEdit,
       handleDelete,
       submitForm,
-      handleSizeChange,
-      handleCurrentChange
+      handleCurrentChange,
+      handleSizeChange
     }
   }
 }
@@ -347,14 +463,31 @@ export default {
 
 .community-card {
   margin-bottom: 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--box-shadow);
   transition: all 0.3s;
+  background: var(--card-bg-gradient);
+  position: relative;
+}
+
+.community-card::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 140px;
+  height: 140px;
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmMGYyZjUiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLWhvbWUiPjxwYXRoIGQ9Ik0zIDlsOS03IDkgN3Y4YTIgMiAwIDAgMS0yIDJINWEyIDIgMCAwIDEtMi0yeiI+PC9wYXRoPjxwb2x5bGluZSBwb2ludHM9IjkgMjIgOSAxMiAxNSAxMiAxNSAyMiI+PC9wb2x5bGluZT48L3N2Zz4=');
+  background-repeat: no-repeat;
+  background-position: right bottom;
+  background-size: 140px;
+  opacity: 0.15;
+  pointer-events: none;
 }
 
 .community-card:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--box-shadow-hover);
   transform: translateY(-3px);
 }
 
@@ -362,15 +495,19 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(90deg, var(--bg-color-light), var(--bg-color));
 }
 
 .card-header span {
   font-size: 18px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-primary);
   position: relative;
   padding-left: 12px;
+  display: flex;
+  align-items: center;
 }
 
 .card-header span::before {
@@ -381,15 +518,18 @@ export default {
   transform: translateY(-50%);
   width: 4px;
   height: 18px;
-  background: linear-gradient(to bottom, #409EFF, #53a8ff);
+  background: linear-gradient(to bottom, #409EFF, #64b5f6);
   border-radius: 2px;
 }
 
 .search-box {
   margin-bottom: 20px;
-  background-color: #f8fafc;
+  background-color: rgba(248, 250, 252, 0.8);
   padding: 20px;
   border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--border-color-light);
+  backdrop-filter: blur(5px);
 }
 
 .pagination-container {
@@ -413,12 +553,26 @@ export default {
 :deep(.el-table) {
   border-radius: 8px;
   overflow: hidden;
+  box-shadow: var(--box-shadow-light);
 }
 
 :deep(.el-table__header-wrapper th) {
-  background-color: #f5f7fa;
-  color: #606266;
+  background-color: var(--bg-color-darker) !important;
+  color: var(--text-regular);
   font-weight: 600;
+  padding: 12px 0;
+}
+
+:deep(.el-table__row) {
+  transition: all 0.3s;
+}
+
+:deep(.el-table__row:hover) {
+  background-color: var(--primary-light) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 2;
 }
 
 :deep(.el-button) {
@@ -428,5 +582,134 @@ export default {
 :deep(.el-button:hover) {
   transform: translateY(-2px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 表单元素增强样式 */
+:deep(.el-input__inner), :deep(.el-textarea__inner) {
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+:deep(.el-input__inner:focus), :deep(.el-textarea__inner:focus) {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
+
+:deep(.el-form-item) {
+  margin-bottom: 22px;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 500;
+  color: var(--text-regular);
+}
+
+/* 添加表格行交替颜色 */
+:deep(.el-table__row:nth-child(even)) {
+  background-color: var(--primary-lighter);
+}
+
+/* 添加自定义选择框样式 */
+.custom-select {
+  width: 100%;
+}
+
+:deep(.el-select .el-input__inner) {
+  border-radius: 8px;
+  border: 1px solid #e0e3e9;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  padding-left: 12px;
+}
+
+:deep(.el-select .el-input__inner:focus) {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
+
+:deep(.el-select .el-select__placeholder) {
+  color: #a0a4a9;
+}
+
+:deep(.el-select .el-input.is-focus .el-input__inner) {
+  border-color: var(--primary-color);
+}
+
+/* 自定义按钮样式 */
+.custom-button {
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.custom-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.custom-button:active {
+  transform: translateY(1px);
+}
+
+/* 查询按钮 */
+.search-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.search-btn:hover {
+  background: #2563eb;
+}
+
+/* 重置按钮 */
+.reset-btn {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.reset-btn:hover {
+  background: #e5e7eb;
+}
+
+/* 编辑按钮 */
+.edit-btn {
+  background: #10b981;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #059669;
+}
+
+/* 删除按钮 */
+.delete-btn {
+  background: #f43f5e;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #e11d48;
+}
+
+/* 取消按钮 */
+.cancel-btn {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+/* 确认按钮 */
+.confirm-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.confirm-btn:hover {
+  background: #2563eb;
 }
 </style> 

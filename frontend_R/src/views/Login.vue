@@ -20,8 +20,8 @@
 <script>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import userApi from '../api/user'
 
 export default {
   name: 'LoginView',
@@ -50,23 +50,22 @@ export default {
           if (valid) {
             loading.value = true
             try {
-              // 实际应用中，这里应该调用后端接口进行身份验证
-              const response = await axios.post('/api/login', {
+              const response = await userApi.login({
                 username: loginForm.username,
                 password: loginForm.password
               })
               
-              if (response.data.success === true) {
-                // 存储用户信息，如果后端没返回这些字段，创建一些基本信息
-                localStorage.setItem('token', response.data.token || 'demo-token')
+              if (response.success === true) {
+                // 存储用户信息
+                localStorage.setItem('token', response.data?.token || 'demo-token')
                 localStorage.setItem('userInfo', JSON.stringify({
                   username: loginForm.username,
-                  ...response.data.user
+                  ...(response.data?.user || {})
                 }))
-                ElMessage.success(response.data.message || '登录成功')
+                ElMessage.success(response.message || '登录成功')
                 router.push('/dashboard')
               } else {
-                ElMessage.error(response.data.message || '登录失败')
+                ElMessage.error(response.message || '登录失败')
               }
             } catch (error) {
               console.error('登录出错：', error)

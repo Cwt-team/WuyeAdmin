@@ -1,5 +1,43 @@
 /* 全局样式文件 */
 
+/* 全局颜色变量 */
+:root {
+  /* 主色调 */
+  --primary-color: #3b82f6;
+  --primary-light: #ecf5ff;
+  --primary-lighter: #f3f8ff;
+  --primary-gradient: linear-gradient(135deg, #3b82f6, #60a5fa);
+  
+  /* 功能色 */
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #f43f5e;
+  --info-color: #64748b;
+  
+  /* 背景色 */
+  --bg-color: #f5f7fa;
+  --bg-color-light: #ffffff;
+  --bg-color-darker: #eef2f6;
+  
+  /* 卡片和内容区背景 */
+  --card-bg: #ffffff;
+  --card-bg-gradient: linear-gradient(145deg, #ffffff, #f9fbfd);
+  
+  /* 阴影 */
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --box-shadow-light: 0 2px 12px rgba(0, 0, 0, 0.05);
+  --box-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.12);
+  
+  /* 文字颜色 */
+  --text-primary: #303133;
+  --text-regular: #606266;
+  --text-secondary: #909399;
+  
+  /* 边框颜色 */
+  --border-color: #ebeef5;
+  --border-color-light: #f2f6fc;
+}
+
 /* 滚动条样式 */
 ::-webkit-scrollbar {
   width: 8px;
@@ -48,29 +86,165 @@
 /* Element Plus 组件全局样式定制 */
 .el-button {
   font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.el-button:active {
+  transform: translateY(1px);
 }
 
 .el-button--primary {
-  --el-button-bg-color: #409EFF;
-  --el-button-border-color: #409EFF;
-  --el-button-hover-bg-color: #53a8ff;
-  --el-button-hover-border-color: #53a8ff;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.el-button--primary:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.el-button--success {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+.el-button--success:hover {
+  background-color: #059669;
+  border-color: #059669;
+}
+
+.el-button--warning {
+  background-color: var(--warning-color);
+  border-color: var(--warning-color);
+}
+
+.el-button--warning:hover {
+  background-color: #d97706;
+  border-color: #d97706;
+}
+
+.el-button--danger {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+.el-button--danger:hover {
+  background-color: #e11d48;
+  border-color: #e11d48;
+}
+
+.el-button--info {
+  background-color: var(--info-color);
+  border-color: var(--info-color);
+}
+
+.el-button--info:hover {
+  background-color: #475569;
+  border-color: #475569;
+}
+
+.el-button--default {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border-color: #f3f4f6;
+}
+
+.el-button--default:hover {
+  background-color: #e5e7eb;
+  border-color: #e5e7eb;
+  color: #374151;
+}
+
+/* 表格样式增强 */
+.el-table {
+  --el-table-header-bg-color: #f5f7fa;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--box-shadow-light);
+}
+
+.el-table::before {
+  display: none;
 }
 
 .el-table th {
   font-weight: 600;
+  background-color: var(--bg-color-darker) !important;
+}
+
+.el-table td {
+  padding: 12px 0;
+}
+
+.el-table--striped .el-table__body tr.el-table__row--striped td {
+  background-color: var(--primary-lighter);
+}
+
+.el-table__body tr:hover > td {
+  background-color: var(--primary-light) !important;
 }
 
 .el-form-item__label {
   font-weight: 500;
 }
 
+.el-dialog {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--box-shadow-hover);
+}
+
+.el-dialog__header {
+  background-color: var(--bg-color);
+  margin: 0;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
 .el-dialog__title {
   font-weight: 600;
 }
 
+.el-dialog__body {
+  padding: 24px;
+}
+
+.el-message-box {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--box-shadow-hover);
+}
+
 .el-message-box__title {
   font-weight: 600;
+}
+
+/* 卡片样式增强 */
+.el-card {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+  transition: all 0.3s;
+  background: var(--card-bg-gradient);
+  border: none;
+}
+
+.el-card:hover {
+  box-shadow: var(--box-shadow-hover);
+  transform: translateY(-3px);
+}
+
+.el-card__header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 /* 空状态样式美化 */
@@ -81,4 +255,33 @@
 /* 加载状态美化 */
 .el-loading-mask {
   backdrop-filter: blur(1px);
+}
+
+/* 添加全局波纹按钮效果 */
+.ripple-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-btn:after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform .3s, opacity .5s;
+}
+
+.ripple-btn:active:after {
+  transform: scale(0, 0);
+  opacity: .3;
+  transition: 0s;
 } 
