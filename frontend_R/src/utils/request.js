@@ -32,6 +32,9 @@ service.interceptors.response.use(
   response => {
     const res = response.data
     
+    // 为调试添加日志
+    console.log('API原始响应:', res)
+    
     // 处理不同的响应格式
     
     // 1. 后端可能返回 success 字段为true的标准格式
@@ -47,13 +50,20 @@ service.interceptors.response.use(
       }
     }
     
-    // 3. 后端可能没有错误状态标记，但有数据(items/list/owners等)
+    // 3. 后端可能返回直接包含业主数据的结构
+    if (res.owners && Array.isArray(res.owners)) {
+      console.log('检测到业主数据结构:', res)
+      // 直接返回原始数据，不做额外包装
+      return res
+    }
+    
+    // 3.1 后端可能没有错误状态标记，但有数据(items/list等)
     if (res.items) {
       // 后端直接返回了items数组和total，这里不做额外包装，让前端组件自己处理
       return res
     }
     
-    if (res.list || res.owners || res.devices || res.total !== undefined) {
+    if (res.list || res.devices || res.total !== undefined) {
       return {
         success: true,
         data: res

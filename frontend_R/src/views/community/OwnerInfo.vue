@@ -18,7 +18,7 @@
             <el-input v-model="searchForm.phone" placeholder="请输入联系电话" clearable></el-input>
           </el-form-item>
           <el-form-item label="所属小区">
-            <el-select v-model="searchForm.communityId" placeholder="请选择小区" clearable>
+            <el-select v-model="searchForm.communityId" placeholder="请选择小区" clearable style="width: 200px">
               <el-option
                 v-for="item in communityOptions"
                 :key="item.value"
@@ -58,8 +58,16 @@
             {{ formatIdCard(scope.row.idCard) }}
           </template>
         </el-table-column>
-        <el-table-column prop="communityName" label="所属小区"></el-table-column>
-        <el-table-column prop="houseInfo" label="房屋信息"></el-table-column>
+        <el-table-column prop="communityName" label="所属小区">
+          <template #default="scope">
+            {{ scope.row.communityName || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="houseInfo" label="房屋信息">
+          <template #default="scope">
+            {{ scope.row.houseInfo || '-' }}
+          </template>
+        </el-table-column>
         <el-table-column prop="createTime" label="创建时间"></el-table-column>
         <el-table-column label="操作" width="200">
           <template #default="scope">
@@ -106,7 +114,7 @@
           <el-input v-model="formData.idCard" placeholder="请输入身份证号"></el-input>
         </el-form-item>
         <el-form-item label="所属小区" prop="communityId">
-          <el-select v-model="formData.communityId" placeholder="请选择小区" style="width: 100%">
+          <el-select v-model="formData.communityId" placeholder="请选择小区" style="width: 200px">
             <el-option
               v-for="item in communityOptions"
               :key="item.value"
@@ -374,7 +382,40 @@ export default {
           let gender = item.gender
           if (typeof gender === 'string') {
             gender = gender === 'M' ? 1 : (gender === 'F' ? 2 : 1)
+          } else if (gender === 1 || gender === 2) {
+            // 数字格式，不需要转换
+          } else {
+            // 默认为男性
+            gender = 1
           }
+          
+          // 提取社区名称
+          let communityName = '';
+          if (item.communityName) {
+            communityName = item.communityName;
+          } else if (item.community) {
+            communityName = item.community.name || item.community.communityName || '';
+          } else if (item.communityInfo) {
+            communityName = item.communityInfo.name || item.communityInfo.communityName || '';
+          } else if (item.communityId) {
+            // 如果只有communityId，尝试从communityOptions中查找
+            const community = communityOptions.value.find(c => c.value == item.communityId);
+            if (community) {
+              communityName = community.label;
+            }
+          }
+          
+          // 提取房屋信息
+          let houseInfo = '';
+          if (item.houseName) {
+            houseInfo = item.houseName;
+          } else if (item.houseInfo) {
+            houseInfo = item.houseInfo;
+          } else if (item.house) {
+            houseInfo = item.house.fullName || item.house.houseName || '';
+          }
+          
+          console.log('处理业主数据:', item, '提取的社区名称:', communityName, '提取的房屋信息:', houseInfo);
           
           return {
             id: item.id,
@@ -383,11 +424,9 @@ export default {
             phone: item.phoneNumber || item.phone,
             idCard: item.idCard,
             communityId: item.communityId,
-            communityName: item.communityName || 
-              (item.communityInfo ? item.communityInfo.name : ''),
+            communityName: communityName,
             houseId: item.houseId,
-            houseInfo: item.houseInfo || 
-              (item.house ? item.house.fullName : ''),
+            houseInfo: houseInfo,
             createTime: item.createTime || item.createdAt || item.updateTime || item.updatedAt
           }
         })
@@ -568,28 +607,26 @@ export default {
           page: 1,
           size: 100
         })
-        
         console.log('社区列表响应:', response)
-        
-        if (response && response.success && response.data) {
-          if (response.data.list && response.data.list.length > 0) {
-            communityOptions.value = response.data.list.map(item => ({
-              value: item.id,
-              label: item.name || item.communityName
-            }))
-          }
-        } else if (response && response.items && response.items.length > 0) {
-          communityOptions.value = response.items.map(item => ({
-            value: item.id,
-            label: item.communityName || item.name
-          }))
-        } else if (Array.isArray(response) && response.length > 0) {
-          communityOptions.value = response.map(item => ({
-            value: item.id,
-            label: item.name || item.communityName
-          }))
-        } else {
-          communityOptions.value = []
+        let list = []
+        // 兼容多种后端返回格式
+        if (response && response.success && response.data && response.data.list) {
+          list = response.data.list
+        } else if (response && response.data && response.data.items) {
+          list = response.data.items
+        } else if (response && response.items) {
+          // 添加对直接返回带items字段对象的处理
+          list = response.items
+        } else if (Array.isArray(response)) {
+          list = response
+        } else if (Array.isArray(response.data)) {
+          list = response.data
+        }
+        communityOptions.value = list.map(item => ({
+          value: item.id,
+          label: item.community_name || item.communityName || item.name || '未命名小区'
+        }))
+        if (communityOptions.value.length === 0) {
           ElMessage.warning('未获取到社区数据')
         }
       } catch (error) {

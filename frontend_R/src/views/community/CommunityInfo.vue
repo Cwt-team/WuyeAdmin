@@ -14,17 +14,21 @@
           <el-row :gutter="20">
             <el-col :span="6">
               <el-form-item label="小区名称/编号">
-                <el-input v-model="searchForm.keyword" placeholder="请输入小区名称/编号" clearable></el-input>
+                <el-input v-model="searchForm.keyword" placeholder="请输入小区名称/编号" clearable>
+                  <template #prefix v-if="searchForm.keyword"><el-icon><Search /></el-icon></template>
+                </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="6">
               <el-form-item label="所在城市">
-                <el-input v-model="searchForm.location" placeholder="请输入所在城市" clearable></el-input>
+                <el-input v-model="searchForm.location" placeholder="请输入所在城市" clearable>
+                  <template #prefix v-if="searchForm.location"><el-icon><Location /></el-icon></template>
+                </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="6">
               <el-form-item label="门禁卡类型">
-                <el-select v-model="searchForm.accessCardType" placeholder="选择门禁卡类型" clearable class="custom-select">
+                <el-select v-model="searchForm.accessCardType" placeholder="选择门禁卡类型" clearable style="width: 100%">
                   <el-option label="NFC" value="NFC" />
                   <el-option label="IC卡" value="IC卡" />
                   <el-option label="NONE" value="NONE" />
@@ -33,7 +37,7 @@
             </el-col>
             <el-col :span="6">
               <el-form-item label="启用状态">
-                <el-select v-model="searchForm.isEnabled" placeholder="选择启用状态" clearable class="custom-select">
+                <el-select v-model="searchForm.isEnabled" placeholder="选择启用状态" clearable style="width: 100%">
                   <el-option label="启用" :value="1" />
                   <el-option label="禁用" :value="0" />
                 </el-select>
@@ -43,7 +47,7 @@
           <el-row :gutter="20">
             <el-col :span="6">
               <el-form-item label="APP人脸录入">
-                <el-select v-model="searchForm.appRecordFace" placeholder="选择人脸录入状态" clearable class="custom-select">
+                <el-select v-model="searchForm.appRecordFace" placeholder="选择人脸录入状态" clearable style="width: 100%">
                   <el-option label="开启" :value="1" />
                   <el-option label="关闭" :value="0" />
                 </el-select>
@@ -51,7 +55,7 @@
             </el-col>
             <el-col :span="6">
               <el-form-item label="记录上传">
-                <el-select v-model="searchForm.isRecordUpload" placeholder="选择记录上传状态" clearable class="custom-select">
+                <el-select v-model="searchForm.isRecordUpload" placeholder="选择记录上传状态" clearable style="width: 100%">
                   <el-option label="开启" :value="1" />
                   <el-option label="关闭" :value="0" />
                 </el-select>
@@ -59,7 +63,7 @@
             </el-col>
             <el-col :span="6">
               <el-form-item label="配置同步">
-                <el-select v-model="searchForm.isSameStep" placeholder="选择配置同步状态" clearable class="custom-select">
+                <el-select v-model="searchForm.isSameStep" placeholder="选择配置同步状态" clearable style="width: 100%">
                   <el-option label="已同步" :value="1" />
                   <el-option label="未同步" :value="0" />
                 </el-select>
@@ -180,19 +184,24 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import communityApi from '../../api/community'
+import { Search, Location } from '@element-plus/icons-vue'
 
 export default {
   name: 'CommunityInfoView',
+  components: {
+    Search,
+    Location
+  },
   setup() {
     // 搜索表单
     const searchForm = reactive({
       keyword: '',
       location: '',
       accessCardType: '',
-      isEnabled: '',
-      appRecordFace: '',
-      isRecordUpload: '',
-      isSameStep: ''
+      isEnabled: null,
+      appRecordFace: null,
+      isRecordUpload: null,
+      isSameStep: null
     })
     
     // 表格数据
@@ -252,11 +261,11 @@ export default {
           size: pagination.pageSize,
           keyword: searchForm.keyword,
           location: searchForm.location,
-          accessCardType: searchForm.accessCardType,
-          isEnabled: searchForm.isEnabled,
-          appRecordFace: searchForm.appRecordFace,
-          isRecordUpload: searchForm.isRecordUpload,
-          isSameStep: searchForm.isSameStep
+          accessCardType: searchForm.accessCardType || null,
+          isEnabled: searchForm.isEnabled || null,
+          appRecordFace: searchForm.appRecordFace || null,
+          isRecordUpload: searchForm.isRecordUpload || null,
+          isSameStep: searchForm.isSameStep || null
         })
         
         // 处理后端返回的数据格式
@@ -405,10 +414,10 @@ export default {
       searchForm.keyword = ''
       searchForm.location = ''
       searchForm.accessCardType = ''
-      searchForm.isEnabled = ''
-      searchForm.appRecordFace = ''
-      searchForm.isRecordUpload = ''
-      searchForm.isSameStep = ''
+      searchForm.isEnabled = null
+      searchForm.appRecordFace = null
+      searchForm.isRecordUpload = null
+      searchForm.isSameStep = null
       pagination.currentPage = 1
       fetchCommunityList()
     }
@@ -596,7 +605,8 @@ export default {
 }
 
 :deep(.el-form-item) {
-  margin-bottom: 22px;
+  position: relative;
+  margin-bottom: 25px;
 }
 
 :deep(.el-form-item__label) {
@@ -609,29 +619,60 @@ export default {
   background-color: var(--primary-lighter);
 }
 
-/* 添加自定义选择框样式 */
-.custom-select {
+/* 简单选择框样式 */
+.simple-select {
   width: 100%;
 }
 
+:deep(.simple-select .el-input__inner) {
+  border-radius: 4px;
+  border: 1px solid #DCDFE6;
+  box-shadow: none;
+}
+
+:deep(.simple-select.el-select .el-input.is-focus .el-input__inner) {
+  border-color: #409EFF;
+}
+
+:deep(.simple-select .el-select__placeholder) {
+  color: #909399;
+}
+
+/* 确保选中值显示 */
+:deep(.el-select-dropdown__item) {
+  padding: 0 15px;
+}
+
+:deep(.el-select .el-select__tags) {
+  max-width: 90%;
+}
+
 :deep(.el-select .el-input__inner) {
-  border-radius: 8px;
-  border: 1px solid #e0e3e9;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-  padding-left: 12px;
+  box-sizing: border-box;
+  cursor: pointer;
+  padding-right: 30px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #606266 !important;
 }
 
-:deep(.el-select .el-input__inner:focus) {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+:deep(.el-select .el-select-v2__placeholder) {
+  color: #909399;
 }
 
-:deep(.el-select .el-select__placeholder) {
-  color: #a0a4a9;
+:deep(.el-select:hover .el-input__inner) {
+  border-color: #c0c4cc;
 }
 
 :deep(.el-select .el-input.is-focus .el-input__inner) {
-  border-color: var(--primary-color);
+  border-color: #409EFF;
+}
+
+:deep(.el-select .el-input__suffix) {
+  top: 0;
+  right: 5px;
+  height: 100%;
 }
 
 /* 自定义按钮样式 */
