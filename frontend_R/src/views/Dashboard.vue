@@ -28,6 +28,7 @@
             <el-menu-item index="/dashboard/community">小区信息</el-menu-item>
             <el-menu-item index="/dashboard/houses">房屋信息</el-menu-item>
             <el-menu-item index="/dashboard/owners">业主信息</el-menu-item>
+            <el-menu-item index="/dashboard/housing-applications">业主申请</el-menu-item>
           </el-sub-menu>
           
           <el-sub-menu index="2">

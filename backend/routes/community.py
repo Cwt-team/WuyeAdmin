@@ -33,7 +33,7 @@ def get_communities():
         
         # 城市搜索
         if location:
-            query = query.filter(CommunityInfo.community_city.like(f'%{location}%'))
+            query = query.filter(CommunityInfo.community_city == location)
             
         # 门禁卡类型过滤
         if access_card_type:

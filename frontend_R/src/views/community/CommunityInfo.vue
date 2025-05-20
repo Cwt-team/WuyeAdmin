@@ -21,9 +21,7 @@
             </el-col>
             <el-col :span="6">
               <el-form-item label="所在城市">
-                <el-input v-model="searchForm.location" placeholder="请输入所在城市" clearable>
-                  <template #prefix v-if="searchForm.location"><el-icon><Location /></el-icon></template>
-                </el-input>
+                <el-input v-model="searchForm.location" placeholder="请输入所在城市" clearable style="width: 100%" />
               </el-form-item>
             </el-col>
             <el-col :span="6">
@@ -32,14 +30,6 @@
                   <el-option label="NFC" value="NFC" />
                   <el-option label="IC卡" value="IC卡" />
                   <el-option label="NONE" value="NONE" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="6">
-              <el-form-item label="启用状态">
-                <el-select v-model="searchForm.isEnabled" placeholder="选择启用状态" clearable style="width: 100%">
-                  <el-option label="启用" :value="1" />
-                  <el-option label="禁用" :value="0" />
                 </el-select>
               </el-form-item>
             </el-col>
@@ -184,13 +174,12 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import communityApi from '../../api/community'
-import { Search, Location } from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 
 export default {
   name: 'CommunityInfoView',
   components: {
-    Search,
-    Location
+    Search
   },
   setup() {
     // 搜索表单
@@ -198,7 +187,6 @@ export default {
       keyword: '',
       location: '',
       accessCardType: '',
-      isEnabled: null,
       appRecordFace: null,
       isRecordUpload: null,
       isSameStep: null
@@ -243,8 +231,8 @@ export default {
         { required: true, message: '请输入小区名称', trigger: 'blur' },
         { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
       ],
-      area: [
-        { required: true, message: '请输入所在地区', trigger: 'blur' }
+      location: [
+        { required: true, message: '请输入所在城市', trigger: 'blur' }
       ],
       address: [
         { required: true, message: '请输入详细地址', trigger: 'blur' }
@@ -262,7 +250,6 @@ export default {
           keyword: searchForm.keyword,
           location: searchForm.location,
           accessCardType: searchForm.accessCardType || null,
-          isEnabled: searchForm.isEnabled || null,
           appRecordFace: searchForm.appRecordFace || null,
           isRecordUpload: searchForm.isRecordUpload || null,
           isSameStep: searchForm.isSameStep || null
@@ -414,7 +401,6 @@ export default {
       searchForm.keyword = ''
       searchForm.location = ''
       searchForm.accessCardType = ''
-      searchForm.isEnabled = null
       searchForm.appRecordFace = null
       searchForm.isRecordUpload = null
       searchForm.isSameStep = null

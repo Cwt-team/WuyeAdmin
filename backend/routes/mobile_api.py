@@ -256,7 +256,7 @@ def get_communities():
             result.append({
                 'id': community.id,
                 'name': community.community_name,
-                'address': community.community_address
+                'address': community.community_city
             })
             
         return jsonify({
@@ -282,7 +282,7 @@ def submit_housing_application():
     id_card = data.get('idCard')
     
     try:
-        # 验证必填项
+        # 校验必填项
         if not all([owner_id, community_id, building_name, unit_name, house_number, id_card]):
             return jsonify({
                 'success': False,
@@ -297,10 +297,20 @@ def submit_housing_application():
                 'message': '用户不存在'
             })
         
+        # 自动校验房屋是否存在
+        house = db.session.query(HouseInfo).filter_by(
+            community_id=community_id,
+            building_number=building_name,
+            unit_number=unit_name,
+            room_number=house_number
+        ).first()
+        house_exists = house is not None
+        house_id = house.id if house_exists else None
+        
         # 创建申请记录
         application = HousingApplication(
             community_id=community_id,
-            house_id=None,  # 申请时可能还不知道具体house_id，只知道楼栋单元房号
+            house_id=house_id,  # 如果存在则写入house_id，否则为None
             name=owner.name,
             gender=owner.gender,
             id_card=id_card,
@@ -309,8 +319,6 @@ def submit_housing_application():
             owner_type='业主',
             application_time=db.func.current_timestamp()
         )
-        
-        # 保存临时的楼栋单元房号信息
         application.building_name = building_name
         application.unit_name = unit_name  
         application.house_number = house_number
@@ -321,7 +329,9 @@ def submit_housing_application():
         return jsonify({
             'success': True,
             'message': '申请已提交，请等待物业审核',
-            'applicationId': application.id
+            'applicationId': application.id,
+            'houseExists': house_exists,
+            'houseId': house_id
         })
         
     except Exception as e:
@@ -410,4 +420,34 @@ def upload_application_proof(application_id):
     except Exception as e:
         db.session.rollback()
         logger.error(f"上传申请证明材料失败: {str(e)}")
-        return jsonify({'success': False, 'message': f'上传失败: {str(e)}'}), 500 
+        return jsonify({'success': False, 'message': f'上传失败: {str(e)}'}), 500
+
+# 获取小区下所有楼栋
+@mobile_api_bp.route('/api/mobile/buildings', methods=['GET'])
+def get_buildings():
+    community_id = request.args.get('communityId')
+    if not community_id:
+        return jsonify({'success': False, 'message': '缺少communityId'}), 400
+    buildings = db.session.query(HouseInfo).filter_by(community_id=community_id, house_level=2).all()
+    result = [{'id': b.id, 'buildingNumber': b.building_number, 'name': b.house_full_name} for b in buildings]
+    return jsonify({'success': True, 'buildings': result})
+
+# 获取楼栋下所有单元
+@mobile_api_bp.route('/api/mobile/units', methods=['GET'])
+def get_units():
+    building_id = request.args.get('buildingId')
+    if not building_id:
+        return jsonify({'success': False, 'message': '缺少buildingId'}), 400
+    units = db.session.query(HouseInfo).filter_by(parent_id=building_id, house_level=3).all()
+    result = [{'id': u.id, 'unitNumber': u.unit_number, 'name': u.house_full_name} for u in units]
+    return jsonify({'success': True, 'units': result})
+
+# 获取单元下所有房间
+@mobile_api_bp.route('/api/mobile/rooms', methods=['GET'])
+def get_rooms():
+    unit_id = request.args.get('unitId')
+    if not unit_id:
+        return jsonify({'success': False, 'message': '缺少unitId'}), 400
+    rooms = db.session.query(HouseInfo).filter_by(parent_id=unit_id, house_level=4).all()
+    result = [{'id': r.id, 'roomNumber': r.room_number, 'name': r.house_full_name} for r in rooms]
+    return jsonify({'success': True, 'rooms': result}) 

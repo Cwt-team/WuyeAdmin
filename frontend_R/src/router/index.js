@@ -46,6 +46,12 @@ const routes = [
         component: () => import('../views/community/OwnerInfo.vue'),
         meta: { title: '业主信息' }
       },
+      {
+        path: 'housing-applications',
+        name: 'HousingApplications',
+        component: () => import('../views/community/HousingApplication.vue'),
+        meta: { title: '业主申请' }
+      },
       // 设备管理
       {
         path: 'doorAccess',

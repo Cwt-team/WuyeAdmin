@@ -107,19 +107,41 @@ def approve_housing_application(application_id):
         # 查找或创建对应的房屋记录
         house = db.session.query(HouseInfo).filter_by(
             community_id=application.community_id,
-            building_name=application.building_name,
-            unit_name=application.unit_name,
-            house_number=application.house_number
+            building_number=application.building_name,
+            unit_number=application.unit_name,
+            room_number=application.house_number
         ).first()
         
         if not house:
-            # 创建新房屋记录
+            # 查找district_number和parent_id
+            district_number = None
+            parent_id = None
+            # 先查找楼栋级（level=2）
+            building = db.session.query(HouseInfo).filter_by(
+                community_id=application.community_id,
+                building_number=application.building_name,
+                house_level=2
+            ).first()
+            if building:
+                district_number = building.district_number
+            # 再查找单元级（level=3）
+            unit = db.session.query(HouseInfo).filter_by(
+                community_id=application.community_id,
+                building_number=application.building_name,
+                unit_number=application.unit_name,
+                house_level=3
+            ).first()
+            if unit:
+                parent_id = unit.id
             house = HouseInfo(
                 community_id=application.community_id,
-                building_name=application.building_name,
-                unit_name=application.unit_name,
-                house_number=application.house_number,
+                district_number=district_number,
+                building_number=application.building_name,
+                unit_number=application.unit_name,
+                room_number=application.house_number,
                 house_full_name=f"{application.building_name}-{application.unit_name}-{application.house_number}",
+                house_level=4,
+                parent_id=parent_id,
                 created_at=db.func.current_timestamp()
             )
             db.session.add(house)
