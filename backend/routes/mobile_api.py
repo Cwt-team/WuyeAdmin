@@ -19,15 +19,21 @@ mobile_api_bp = Blueprint('mobile_api', __name__)
 @mobile_api_bp.route('/api/mobile/login', methods=['POST'])
 def mobile_login():
     data = request.form
-    phone_number = data.get('phone_number')
+    username = data.get('username')
     password = data.get('password')
 
     try:
-        # 用手机号和密码查找
-        owner = db.session.query(OwnerInfo).filter_by(phone_number=phone_number, password=password).first()
+        # 判断username是手机号还是账号
+        if username is None or password is None:
+            return jsonify({'success': False, 'message': '请输入账号/手机号和密码'})
+        if username.isdigit() and len(username) == 11:
+            # 手机号登录
+            owner = db.session.query(OwnerInfo).filter_by(phone_number=username, password=password).first()
+        else:
+            # 账号登录
+            owner = db.session.query(OwnerInfo).filter_by(account=username, password=password).first()
 
         if owner:
-            # 成功找到用户
             return jsonify({
                 'success': True,
                 'message': '登录成功',
@@ -41,13 +47,11 @@ def mobile_login():
                 }
             })
         else:
-            # 未找到用户
             return jsonify({
                 'success': False,
                 'message': '账号或密码错误'
             })
     except Exception as e:
-        # 记录错误
         logger.error(f"移动端登录失败: {str(e)}")
         return jsonify({
             'success': False,
