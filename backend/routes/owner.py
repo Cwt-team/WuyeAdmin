@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 from backend.models.owner import OwnerInfo
 from backend.models import HouseInfo
 from backend.db import db
@@ -28,6 +28,10 @@ def get_owners():
                     HouseInfo.unit_number.like(f'%{house}%')
                 )
             )
+            
+        # 权限过滤：非超级管理员只查自己有权限的小区
+        if 'username' in session and session.get('role') != '超级管理员':
+            query = query.filter(OwnerInfo.community_id == session.get('community_id'))
             
         total = query.count()
         owners = query.order_by(OwnerInfo.updated_at.desc())\

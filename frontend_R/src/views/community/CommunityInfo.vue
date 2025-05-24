@@ -3,115 +3,153 @@
     <el-card class="community-card">
       <template #header>
         <div class="card-header">
-          <span>小区信息管理</span>
+          <el-tabs v-model="activeTab">
+            <el-tab-pane label="小区管理" name="community" />
+            <el-tab-pane label="区管理" name="district" />
+          </el-tabs>
           <el-button type="primary" size="small" @click="handleAdd">添加小区</el-button>
         </div>
       </template>
-      
-      <!-- 搜索区域 -->
-      <div class="search-box">
-        <el-form :inline="true" :model="searchForm">
-          <el-row :gutter="20">
-            <el-col :span="6">
-              <el-form-item label="小区名称/编号">
-                <el-input v-model="searchForm.keyword" placeholder="请输入小区名称/编号" clearable>
-                  <template #prefix v-if="searchForm.keyword"><el-icon><Search /></el-icon></template>
-                </el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="6">
-              <el-form-item label="所在城市">
-                <el-input v-model="searchForm.location" placeholder="请输入所在城市" clearable style="width: 100%" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="6">
-              <el-form-item label="门禁卡类型">
-                <el-select v-model="searchForm.accessCardType" placeholder="选择门禁卡类型" clearable style="width: 100%">
-                  <el-option label="NFC" value="NFC" />
-                  <el-option label="IC卡" value="IC卡" />
-                  <el-option label="NONE" value="NONE" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row :gutter="20">
-            <el-col :span="6">
-              <el-form-item label="APP人脸录入">
-                <el-select v-model="searchForm.appRecordFace" placeholder="选择人脸录入状态" clearable style="width: 100%">
-                  <el-option label="开启" :value="1" />
-                  <el-option label="关闭" :value="0" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="6">
-              <el-form-item label="记录上传">
-                <el-select v-model="searchForm.isRecordUpload" placeholder="选择记录上传状态" clearable style="width: 100%">
-                  <el-option label="开启" :value="1" />
-                  <el-option label="关闭" :value="0" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="6">
-              <el-form-item label="配置同步">
-                <el-select v-model="searchForm.isSameStep" placeholder="选择配置同步状态" clearable style="width: 100%">
-                  <el-option label="已同步" :value="1" />
-                  <el-option label="未同步" :value="0" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="6">
-              <el-form-item>
-                <el-button type="primary" @click="handleSearch" class="custom-button search-btn">查询</el-button>
-                <el-button @click="handleReset" class="custom-button reset-btn">重置</el-button>
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-form>
+      <div v-if="activeTab === 'community'">
+        <!-- 搜索区域 -->
+        <div class="search-box">
+          <el-form :inline="true" :model="searchForm">
+            <el-row :gutter="20">
+              <el-col :span="6">
+                <el-form-item label="小区名称/编号">
+                  <el-input v-model="searchForm.keyword" placeholder="请输入小区名称/编号" clearable>
+                    <template #prefix v-if="searchForm.keyword"><el-icon><Search /></el-icon></template>
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="所在城市">
+                  <el-input v-model="searchForm.location" placeholder="请输入所在城市" clearable style="width: 100%" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="门禁卡类型">
+                  <el-select v-model="searchForm.accessCardType" placeholder="选择门禁卡类型" clearable style="width: 100%">
+                    <el-option label="NFC" value="NFC" />
+                    <el-option label="IC卡" value="IC卡" />
+                    <el-option label="NONE" value="NONE" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="6">
+                <el-form-item label="APP人脸录入">
+                  <el-select v-model="searchForm.appRecordFace" placeholder="选择人脸录入状态" clearable style="width: 100%">
+                    <el-option label="开启" :value="1" />
+                    <el-option label="关闭" :value="0" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="记录上传">
+                  <el-select v-model="searchForm.isRecordUpload" placeholder="选择记录上传状态" clearable style="width: 100%">
+                    <el-option label="开启" :value="1" />
+                    <el-option label="关闭" :value="0" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="配置同步">
+                  <el-select v-model="searchForm.isSameStep" placeholder="选择配置同步状态" clearable style="width: 100%">
+                    <el-option label="已同步" :value="1" />
+                    <el-option label="未同步" :value="0" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item>
+                  <el-button type="primary" @click="handleSearch" class="custom-button search-btn">查询</el-button>
+                  <el-button @click="handleReset" class="custom-button reset-btn">重置</el-button>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </div>
+        
+        <!-- 表格区域 -->
+        <el-table :data="communityList" border style="width: 100%" v-loading="tableLoading">
+          <el-table-column type="index" width="50" label="序号"></el-table-column>
+          <el-table-column prop="code" label="小区编号"></el-table-column>
+          <el-table-column prop="name" label="小区名称"></el-table-column>
+          <el-table-column prop="area" label="所在地区"></el-table-column>
+          <el-table-column prop="buildingCount" label="楼栋数量"></el-table-column>
+          <el-table-column prop="houseCount" label="房屋数量"></el-table-column>
+          <el-table-column prop="accessCardType" label="门禁卡类型"></el-table-column>
+          <el-table-column prop="appRecordFace" label="APP人脸录入">
+            <template #default="scope">
+              <el-tag :type="scope.row.appRecordFace === 1 ? 'success' : 'info'">
+                {{ scope.row.appRecordFace === 1 ? '开启' : '关闭' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="isSameStep" label="配置同步">
+            <template #default="scope">
+              <el-tag :type="scope.row.isSameStep === 1 ? 'success' : 'warning'">
+                {{ scope.row.isSameStep === 1 ? '已同步' : '未同步' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="createTime" label="创建时间"></el-table-column>
+          <el-table-column label="操作" width="180">
+            <template #default="scope">
+              <el-button type="primary" size="small" @click="handleEdit(scope.row)" class="custom-button edit-btn">编辑</el-button>
+              <el-button type="danger" size="small" @click="handleDelete(scope.row)" class="custom-button delete-btn">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        
+        <!-- 分页区域 -->
+        <div class="pagination-container">
+          <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="pagination.currentPage"
+            :page-sizes="[10, 20, 50, 100]"
+            :page-size="pagination.pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="pagination.total">
+          </el-pagination>
+        </div>
       </div>
-      
-      <!-- 表格区域 -->
-      <el-table :data="communityList" border style="width: 100%" v-loading="tableLoading">
-        <el-table-column type="index" width="50" label="序号"></el-table-column>
-        <el-table-column prop="code" label="小区编号"></el-table-column>
-        <el-table-column prop="name" label="小区名称"></el-table-column>
-        <el-table-column prop="area" label="所在地区"></el-table-column>
-        <el-table-column prop="buildingCount" label="楼栋数量"></el-table-column>
-        <el-table-column prop="houseCount" label="房屋数量"></el-table-column>
-        <el-table-column prop="accessCardType" label="门禁卡类型"></el-table-column>
-        <el-table-column prop="appRecordFace" label="APP人脸录入">
-          <template #default="scope">
-            <el-tag :type="scope.row.appRecordFace === 1 ? 'success' : 'info'">
-              {{ scope.row.appRecordFace === 1 ? '开启' : '关闭' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="isSameStep" label="配置同步">
-          <template #default="scope">
-            <el-tag :type="scope.row.isSameStep === 1 ? 'success' : 'warning'">
-              {{ scope.row.isSameStep === 1 ? '已同步' : '未同步' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="createTime" label="创建时间"></el-table-column>
-        <el-table-column label="操作" width="180">
-          <template #default="scope">
-            <el-button type="primary" size="small" @click="handleEdit(scope.row)" class="custom-button edit-btn">编辑</el-button>
-            <el-button type="danger" size="small" @click="handleDelete(scope.row)" class="custom-button delete-btn">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      
-      <!-- 分页区域 -->
-      <div class="pagination-container">
-        <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="pagination.currentPage"
-          :page-sizes="[10, 20, 50, 100]"
-          :page-size="pagination.pageSize"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="pagination.total">
-        </el-pagination>
+      <div v-else>
+        <!-- 区管理内容 -->
+        <div class="search-box">
+          <el-form :inline="true" :model="districtSearchForm">
+            <el-form-item label="区名/小区名/编号">
+              <el-input v-model="districtSearchForm.keyword" placeholder="请输入区名/小区名/编号" clearable>
+                <template #prefix v-if="districtSearchForm.keyword"><el-icon><Search /></el-icon></template>
+              </el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="handleDistrictSearch">查询</el-button>
+              <el-button @click="handleDistrictReset">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+        <el-table :data="districtList" border style="width: 100%" v-loading="districtTableLoading">
+          <el-table-column type="index" width="50" label="序号"></el-table-column>
+          <el-table-column prop="districtNumber" label="区编号"></el-table-column>
+          <el-table-column prop="districtName" label="区名称"></el-table-column>
+          <el-table-column prop="communityName" label="所属小区"></el-table-column>
+          <el-table-column prop="communityCity" label="城市"></el-table-column>
+        </el-table>
+        <div class="pagination-container">
+          <el-pagination
+            @size-change="handleDistrictSizeChange"
+            @current-change="handleDistrictCurrentChange"
+            :current-page="districtPagination.currentPage"
+            :page-sizes="[10, 20, 50, 100]"
+            :page-size="districtPagination.pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="districtPagination.total">
+          </el-pagination>
+        </div>
       </div>
     </el-card>
     
@@ -171,7 +209,7 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import communityApi from '../../api/community'
 import { Search } from '@element-plus/icons-vue'
@@ -182,6 +220,8 @@ export default {
     Search
   },
   setup() {
+    // Tab切换
+    const activeTab = ref('community')
     // 搜索表单
     const searchForm = reactive({
       keyword: '',
@@ -421,12 +461,62 @@ export default {
       fetchCommunityList()
     }
     
+    // 区管理相关数据
+    const districtSearchForm = reactive({ keyword: '' })
+    const districtList = ref([])
+    const districtTableLoading = ref(false)
+    const districtPagination = reactive({ currentPage: 1, pageSize: 10, total: 0 })
+    // 区管理方法
+    const fetchDistrictList = async () => {
+      districtTableLoading.value = true
+      try {
+        const response = await communityApi.getDistrictList({
+          page: districtPagination.currentPage,
+          size: districtPagination.pageSize,
+          keyword: districtSearchForm.keyword
+        })
+        if (response.items) {
+          districtList.value = response.items
+          districtPagination.total = response.total || 0
+        } else {
+          districtList.value = []
+          districtPagination.total = 0
+        }
+      } catch (e) {
+        ElMessage.error('获取区列表失败')
+      } finally {
+        districtTableLoading.value = false
+      }
+    }
+    const handleDistrictSearch = () => {
+      districtPagination.currentPage = 1
+      fetchDistrictList()
+    }
+    const handleDistrictReset = () => {
+      districtSearchForm.keyword = ''
+      districtPagination.currentPage = 1
+      fetchDistrictList()
+    }
+    const handleDistrictSizeChange = (val) => {
+      districtPagination.pageSize = val
+      fetchDistrictList()
+    }
+    const handleDistrictCurrentChange = (val) => {
+      districtPagination.currentPage = val
+      fetchDistrictList()
+    }
+    // 监听Tab切换，切到区管理时自动加载数据
+    watch(activeTab, (val) => {
+      if (val === 'district') fetchDistrictList()
+    })
+    
     // 初始化
     onMounted(() => {
       fetchCommunityList()
     })
     
     return {
+      activeTab,
       searchForm,
       communityList,
       tableLoading,
@@ -444,7 +534,15 @@ export default {
       handleDelete,
       submitForm,
       handleCurrentChange,
-      handleSizeChange
+      handleSizeChange,
+      districtSearchForm,
+      districtList,
+      districtTableLoading,
+      districtPagination,
+      handleDistrictSearch,
+      handleDistrictReset,
+      handleDistrictSizeChange,
+      handleDistrictCurrentChange
     }
   }
 }

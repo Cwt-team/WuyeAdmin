@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 from backend.models.house import HouseInfo
 from backend.models.community_info import CommunityInfo
 from backend.models.owner import OwnerInfo
@@ -26,6 +26,10 @@ def get_houses():
         
         # 构建基础查询
         query = HouseInfo.query
+        
+        # 权限过滤：非超级管理员只查自己有权限的小区
+        if 'username' in session and session.get('role') != '超级管理员':
+            query = query.filter(HouseInfo.community_id == session.get('community_id'))
         
         # 应用过滤条件
         if community_id:

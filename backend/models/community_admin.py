@@ -11,6 +11,7 @@ class CommunityAdmin(db.Model):
     account_number = db.Column(db.String(50), nullable=False, unique=True, comment='账号')
     character_type = db.Column(db.String(50), nullable=False, comment='角色')
     phone_number = db.Column(db.String(20), nullable=False, comment='手机号码')
+    password = db.Column(db.String(100), nullable=False, default='', comment='登录密码')
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now, comment='创建时间')
 
     def to_dict(self):

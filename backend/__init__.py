@@ -65,6 +65,8 @@ def create_app():
     from backend.routes.device import device_bp
     from backend.routes.mobile_api import mobile_api_bp
     from backend.routes.housing_application import housing_application_bp
+    from backend.routes.community_admin import community_admin_bp
+    from backend.models.community_admin import CommunityAdmin
 
     # 注册蓝图前记录日志
     logger.info("正在注册维修模块蓝图")
@@ -125,17 +127,20 @@ def create_app():
         username = data.get('username')
         password = data.get('password')
 
-        # 超级管理员账号
+        # 先查community_manager
+        manager = CommunityAdmin.query.filter_by(account_number=username).first()
+        if manager and manager.password == password:
+            session['username'] = username
+            session['role'] = '普通管理员'  # 统一为普通管理员
+            session['community_id'] = manager.community_id
+            return jsonify({'success': True, 'message': '登录成功', 'role': '普通管理员'})
+
+        # 兼容超级管理员
         if username == 'admin' and password == 'password':
             session['username'] = username
-            return jsonify({'success': True, 'message': '登录成功'})
+            session['role'] = '超级管理员'
+            return jsonify({'success': True, 'message': '登录成功', 'role': '超级管理员'})
 
-        # 普通用户登录
-        user = PersonalInfo.query.filter_by(account_number=username).first()
-        if user and user.password == password:  # 直接比较密码
-            session['username'] = username
-            return jsonify({'success': True, 'message': '登录成功'})
-        
         return jsonify({'success': False, 'message': '用户名或密码错误'})
 
     @app.route('/api/owners/export-template', methods=['GET'])

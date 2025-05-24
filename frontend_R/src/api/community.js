@@ -111,5 +111,16 @@ export default {
       isRecordUpload: item.isRecordUpload !== undefined ? item.isRecordUpload : 1,
       isEnabled: item.isEnabled !== undefined ? item.isEnabled : 1
     }
+  },
+
+  // 新增：获取区列表
+  getDistrictList(params) {
+    const apiParams = {
+      page: params.page || 1,
+      size: params.size || 10
+    }
+    if (params.keyword) apiParams.keyword = params.keyword
+    if (params.communityId) apiParams.communityId = params.communityId
+    return request.get('/districts', apiParams)
   }
 } 
